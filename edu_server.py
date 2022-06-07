@@ -50,6 +50,7 @@ def sign_up(clnt_num):
     while True:
         check = 0
         check_id = recv_clnt_msg(clnt_sock)
+        print(check_id)
         if check_id == "exit":  # 클라이언트에서 회원가입창 닫을 시 return
             con.close()
             break
@@ -72,6 +73,7 @@ def sign_up(clnt_num):
         send_clnt_msg(clnt_sock, 'OK')  # 중복 아닐시 OK send
 
         user_data = recv_clnt_msg(clnt_sock)  # id포함 회원가입 데이터 받아옴(구분자 : /)
+        print(user_data)
         user_data = user_data.split('/')
         lock.acquire()
         if type == 'stu':  # 학생/선생 맞춰서 table에 데이터 저장
