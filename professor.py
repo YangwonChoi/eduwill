@@ -54,7 +54,7 @@ class Professor_Window(QMainWindow, form_main):
         self.sing_pw.setEchoMode(QLineEdit.Password)
         self.sing_pw_2.setEchoMode(QLineEdit.Password)
         self.login_pw.setEchoMode(QLineEdit.Password)
-        self.login_btn.clicked.connect(self.login)
+   
 
 
     def sing_up(self):
