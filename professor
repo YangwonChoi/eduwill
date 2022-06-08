@@ -26,6 +26,7 @@ class SocketClient(QThread):
         sys.stdout.flush()
         data = self.cnn.recv(2048)
         data = data.decode()
+        return data
 
     def send(self, msg):
         if self.is_run:
@@ -37,7 +38,7 @@ class Professor_Window(QMainWindow, form_main):
         self.initUI()
         self.t1 = SocketClient()
         self.t1.connect_cle()
-
+        self.menu_widget.hide()
         self.show()
         self.id_check = None
 #-----------------시그널-----------------------------
@@ -61,6 +62,9 @@ class Professor_Window(QMainWindow, form_main):
         self.sing_widget.show()
 
     def sing_up_exit(self):
+        self.t1.send('@exit')
+        self.sing_di.setDisabled(False)
+        self.idcheck_btn.setDisabled(False)
         self.name.clear()
         self.sing_di.clear()
         self.sing_pw.clear()
@@ -68,15 +72,23 @@ class Professor_Window(QMainWindow, form_main):
         self.sing_widget.close()
     def overlap_id(self):
         id = self.sing_di.text()
+        sys.stdin.flush()
         self.t1.send(id)
         msg = self.t1.recv()
-        print(msg)
+
         if msg == 'OK':
             self.id_check = True
+            QMessageBox.about(self, '중복', '사용 가능한 아이디 입니다')
+            self.sing_di.setDisabled(True)
+            self.idcheck_btn.setDisabled(True)
+
         elif msg == 'NO':
             self.id_check = False
+            QMessageBox.about(self, '중복', '중복된 아이디 입니다')
+            self.sing_di.setDisabled(False)
+            self.idcheck_btn.setDisabled(False)
         else:
-            pass
+            self.id_check = False
     def sing_up_cf(self):
         sing_check = True
         if self.sing_pw.text() != self.sing_pw_2.text():
@@ -87,8 +99,8 @@ class Professor_Window(QMainWindow, form_main):
         if not sing_check:
             pass
         else:
-            self.t1.send()
 
+            self.t1.send(f"{self.sing_di.text()}/{self.sing_pw.text()}/{self.name.text()}")
             self.name.clear()
             self.sing_di.clear()
             self.sing_pw.clear()
@@ -96,7 +108,9 @@ class Professor_Window(QMainWindow, form_main):
             self.sing_widget.close()
 
     def login(self):  # 로그인 버튼 눌럿을때
-        pass
+        self.t1.send(f"@log_in {self.login_id.text()}/{self.login_pw.text()}")
+        check = self.t1.recv()
+        print(check)
 
 
 if __name__ == "__main__":
