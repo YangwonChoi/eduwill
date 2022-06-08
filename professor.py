@@ -5,6 +5,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QThread, pyqtSlot
 from socket import *
 
+
 form_main = uic.loadUiType("professor.ui")[0]
 
 class SocketClient(QThread):
@@ -51,10 +52,14 @@ class Professor_Window(QMainWindow, form_main):
     def initUI(self):
         self.setupUi(self)
         self.sing_widget.hide()
+        self.chat_widget.hide()
         self.sing_pw.setEchoMode(QLineEdit.Password)
         self.sing_pw_2.setEchoMode(QLineEdit.Password)
         self.login_pw.setEchoMode(QLineEdit.Password)
         self.login_btn.clicked.connect(self.login)
+        self.send_btn.clicked.connect(self.add_chat) # "보내기"버튼 눌렀을때
+        self.text_input.returnPressed.connect(self.add_chat) # 엔터키로 텍스트브라우저에 입력
+        self.pushButton_4.clicked.connect(self.send_msg) # 상담 버튼 눌렀을때
 
 
     def sing_up(self):
@@ -70,6 +75,8 @@ class Professor_Window(QMainWindow, form_main):
         self.sing_pw.clear()
         self.sing_pw_2.clear()
         self.sing_widget.close()
+
+
     def overlap_id(self):
         id = self.sing_di.text()
         sys.stdin.flush()
@@ -89,6 +96,8 @@ class Professor_Window(QMainWindow, form_main):
             self.idcheck_btn.setDisabled(False)
         else:
             self.id_check = False
+
+
     def sing_up_cf(self):
         sing_check = True
         if self.sing_pw.text() != self.sing_pw_2.text():
@@ -98,8 +107,8 @@ class Professor_Window(QMainWindow, form_main):
 
         if not sing_check:
             pass
-        else:
 
+        else:
             self.t1.send(f"{self.sing_di.text()}/{self.sing_pw.text()}/{self.name.text()}")
             self.name.clear()
             self.sing_di.clear()
@@ -122,6 +131,36 @@ class Professor_Window(QMainWindow, form_main):
 
         elif check == "@sucess":
             self.menu_widget.show()
+
+
+    def send_msg(self):
+        self.chat_widget.show()
+        self.menu_widget.hide()
+        self.sing_widget.hide()
+        self.widget.hide()
+
+
+
+    def add_chat(self):
+
+        self.tea_input = self.text_input.text()
+        self.textBrowser.append(self.tea_input)
+        self.t1.send(self.tea_input)
+        self.text_input.clear()
+
+        if self.tea_input == "상담종료":
+            QMessageBox.about(self, '알림', '상담이 종료되었습니다.')
+
+            self.chat_widget.hide()
+            self.menu_widget.show()
+            self.sing_widget.hide()
+            self.widget.hide()
+
+
+    def recv_msg(self):
+        data = self.t1.recv()
+        self.textBrowser.append(data)
+
 
 
 
