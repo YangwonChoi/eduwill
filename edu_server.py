@@ -43,6 +43,7 @@ def delete_imfor(clnt_sock):
 
 
 def sign_up(clnt_num):
+    print('dd')
     con, c = get_DBcursor()
     clnt_sock = clnt_imfor[clnt_num][0]
     type = clnt_imfor[clnt_num][2]
@@ -69,10 +70,14 @@ def sign_up(clnt_num):
                 break
         if check == 1:
             continue
-        send_clnt_msg(clnt_sock, 'OK')  # 중복 아닐시 OK send
+        send_clnt_msg(clnt_sock, 'OK')  # 중복 아닐시 OK sende
 
         user_data = recv_clnt_msg(clnt_sock)  # id포함 회원가입 데이터 받아옴(구분자 : /)
+        if user_data == 'exit':
+            con.close()
+            return
         user_data = user_data.split('/')
+        print(user_data)
         lock.acquire()
         if type == 'stu':  # 학생/선생 맞춰서 table에 데이터 저장
             c.executemany(
@@ -91,6 +96,7 @@ def sign_up(clnt_num):
 
 
 def log_in(clnt_num, log_in_data):
+    print(log_in_data)
     con, c = get_DBcursor()
     clnt_sock = clnt_imfor[clnt_num][0]
     type = clnt_imfor[clnt_num][2]
@@ -108,18 +114,18 @@ def log_in(clnt_num, log_in_data):
         return
     pw = c.fetchone()
     if not c:  # 해당 id 없을시 @ID error
-        send_clnt_msg(clnt_sock, '@ID error')
+        send_clnt_msg(clnt_sock, 'ID error')
         con.close()
         return
     else:  # 해당 id에 대한 pw 일치 시 @sucess send 및 clnt_imfor 갱신
         if (check_pw,) == pw:
-            send_clnt_msg(clnt_sock, '@sucess')
+            send_clnt_msg(clnt_sock, 'sucess')
             clnt_imfor[clnt_num][1] = check_id
             clnt_imfor[clnt_num][3] = 1
             print('login %s, %s' % (type, check_id))
             con.close()
         else:  # id는 있지만 pw 불일치시 @PW error
-            send_clnt_msg(clnt_sock, '@PW error')
+            send_clnt_msg(clnt_sock, 'PW error')
             con.close()
     return
 
