@@ -816,11 +816,6 @@ color: black;
         <height>441</height>
        </rect>
       </property>
-      <item>
-       <property name="text">
-        <string>공</string>
-       </property>
-      </item>
      </widget>
      <widget class="QLabel" name="label_15">
       <property name="geometry">
@@ -1043,6 +1038,19 @@ color: black;
       </property>
       <property name="text">
        <string>공룡 목록</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="lean_exit_btn">
+      <property name="geometry">
+       <rect>
+        <x>550</x>
+        <y>460</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>종료</string>
       </property>
      </widget>
     </widget>
