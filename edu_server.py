@@ -65,12 +65,12 @@ def sign_up(clnt_num):
             return
         for row in c:                               # id 중복시 NO send
             if check_id in row:
-                send_clnt_msg(clnt_sock, 'NO')
+                send_clnt_msg(clnt_sock, '@sign_up NO')
                 check = 1
                 break
         if check == 1:
             continue
-        send_clnt_msg(clnt_sock, 'OK')  # 중복 아닐시 OK sende
+        send_clnt_msg(clnt_sock, '@sign_up OK')  # 중복 아닐시 OK sende
 
         user_data = recv_clnt_msg(clnt_sock)  # id포함 회원가입 데이터 받아옴(구분자 : /)
         if user_data == 'exit':
@@ -96,7 +96,6 @@ def sign_up(clnt_num):
 
 
 def log_in(clnt_num, log_in_data):
-    print(log_in_data)
     con, c = get_DBcursor()
     clnt_sock = clnt_imfor[clnt_num][0]
     type = clnt_imfor[clnt_num][2]
@@ -113,7 +112,7 @@ def log_in(clnt_num, log_in_data):
         con.close()
         return
     pw = c.fetchone()
-    if not c:  # 해당 id 없을시 @ID error
+    if not pw:  # 해당 id 없을시 @ID error
         send_clnt_msg(clnt_sock, 'ID error')
         con.close()
         return
@@ -290,7 +289,8 @@ def handle_clnt(clnt_sock):
             delete_imfor(clnt_sock)
             lock.release()
             break
-
+        
+        print(clnt_msg)
         if clnt_msg.startswith('@'):            # 특정 기능 실행 시 @ 붙여서 받음
             clnt_msg = clnt_msg.replace('@', '')
             call_func(clnt_num, clnt_msg)       # 명령어 함수 호출하는 함수

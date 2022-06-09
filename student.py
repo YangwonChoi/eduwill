@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import *
 from PyQt5 import uic
 from PyQt5 import QtCore
 from PyQt5.QtCore import QThread, pyqtSlot
-import socket
+from socket import *
 import sys
 
 form_stu = uic.loadUiType("student.ui")[0]
@@ -20,16 +20,15 @@ class SocketClient(QThread):
         self.is_run = False
 
     def connect_cle(self):
-        self.cnn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.cnn = socket(AF_INET, SOCK_STREAM)
         self.cnn.connect(('127.0.0.1', 2090))
         self.is_run = True
         self.cnn.send('stu'.encode())
 
     def recv(self):
-        #sys.stdout.flush()
+        sys.stdout.flush()
         data = self.cnn.recv(2048)
         data = data.decode()
-        return data
 
     def send(self, msg):
         if self.is_run:
@@ -56,7 +55,6 @@ class Student_Window(QMainWindow, form_stu):
         id = self.sign_id.text()
         self.t1.send(id)
         msg = self.t1.recv()
-        print(msg)
         if msg == 'OK':
             pass
         elif msg == 'NO':
