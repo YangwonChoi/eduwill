@@ -43,6 +43,7 @@ def delete_imfor(clnt_sock):
 
 
 def sign_up(clnt_num):
+    print('dd')
     con, c = get_DBcursor()
     clnt_sock = clnt_imfor[clnt_num][0]
     type = clnt_imfor[clnt_num][2]
@@ -50,7 +51,6 @@ def sign_up(clnt_num):
     while True:
         check = 0
         check_id = recv_clnt_msg(clnt_sock)
-        print(check_id)
         if check_id == "exit":  # 클라이언트에서 회원가입창 닫을 시 return
             con.close()
             break
@@ -65,16 +65,19 @@ def sign_up(clnt_num):
             return
         for row in c:                               # id 중복시 NO send
             if check_id in row:
-                send_clnt_msg(clnt_sock, 'NO')
+                send_clnt_msg(clnt_sock, '@sign_up NO')
                 check = 1
                 break
         if check == 1:
             continue
-        send_clnt_msg(clnt_sock, 'OK')  # 중복 아닐시 OK send
+        send_clnt_msg(clnt_sock, '@sign_up OK')  # 중복 아닐시 OK sende
 
         user_data = recv_clnt_msg(clnt_sock)  # id포함 회원가입 데이터 받아옴(구분자 : /)
-        print(user_data)
+        if user_data == 'exit':
+            con.close()
+            return
         user_data = user_data.split('/')
+        print(user_data)
         lock.acquire()
         if type == 'stu':  # 학생/선생 맞춰서 table에 데이터 저장
             c.executemany(
@@ -109,19 +112,19 @@ def log_in(clnt_num, log_in_data):
         con.close()
         return
     pw = c.fetchone()
-    if not c:  # 해당 id 없을시 @ID error
-        send_clnt_msg(clnt_sock, '@ID error')
+    if not pw:  # 해당 id 없을시 @ID error
+        send_clnt_msg(clnt_sock, '@log_in ID error')
         con.close()
         return
     else:  # 해당 id에 대한 pw 일치 시 @sucess send 및 clnt_imfor 갱신
         if (check_pw,) == pw:
-            send_clnt_msg(clnt_sock, '@sucess')
+            send_clnt_msg(clnt_sock, '@log_in sucess')
             clnt_imfor[clnt_num][1] = check_id
             clnt_imfor[clnt_num][3] = 1
             print('login %s, %s' % (type, check_id))
             con.close()
         else:  # id는 있지만 pw 불일치시 @PW error
-            send_clnt_msg(clnt_sock, '@PW error')
+            send_clnt_msg(clnt_sock, '@log_in PW error')
             con.close()
     return
 
@@ -286,7 +289,8 @@ def handle_clnt(clnt_sock):
             delete_imfor(clnt_sock)
             lock.release()
             break
-
+        
+        print(clnt_msg)
         if clnt_msg.startswith('@'):            # 특정 기능 실행 시 @ 붙여서 받음
             clnt_msg = clnt_msg.replace('@', '')
             call_func(clnt_num, clnt_msg)       # 명령어 함수 호출하는 함수
@@ -296,6 +300,7 @@ def handle_clnt(clnt_sock):
 
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(('', PORT))
     sock.listen(5)
 
