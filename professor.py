@@ -25,6 +25,7 @@ class SocketClient(QThread):
         while True:
             data = self.cnn.recv(1024)
             data = data.decode()
+            print(data)
 
             if data.startswith('@sign_up') or data.startswith('@log_in'):
                 self.add_user.emit(data)
@@ -45,7 +46,7 @@ class Professor_Window(QMainWindow, form_main):
         self.t1 = SocketClient()
         self.t1.connect_cle()
         self.menu_widget.hide()
-        self.widget_2.hide()
+        self.select_widget.hide()
         self.chat_widget.hide()
         self.t1.start()
 
@@ -112,7 +113,7 @@ class Professor_Window(QMainWindow, form_main):
         self.menu_widget.hide()
         self.t1.send("@member")
         #리시브받아서 리스트위젯에 넣어야함
-        self.widget_2.show()
+        self.select_widget.show()
 
     @pyqtSlot(str)
     def add_user(self, msg):
@@ -135,17 +136,15 @@ class Professor_Window(QMainWindow, form_main):
         elif msg.startswith('@log_in'):
             msg = msg.replace('@log_in ', '', 1)
             if msg == 'sucess':
-                self.widget.hide()
+                self.login_widget.hide()
                 self.menu_widget.show()
             elif msg == 'ID error':
                 QMessageBox.about(self, '경고', '아이디가 잘못 되었습니다')
-                self.login_id.clear()
-                self.login_pw.clear()
 
             else:
                 QMessageBox.about(self, '경고', '비밀번호가 잘못 되었습니다')
-                self.login_id.clear()
-                self.login_pw.clear()
+            self.login_id.clear()
+            self.login_pw.clear()
 
 
 
