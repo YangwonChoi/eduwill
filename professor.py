@@ -25,19 +25,12 @@ class SocketClient(QThread):
         while True:
             data = self.cnn.recv(1024)
             data = data.decode()
-#@sign_up중복
+
             if data.startswith('@sign_up') or data.startswith('@log_in'):
                 self.add_user.emit(data)
-
-
             else:
                 self.add_chat.emit(data)
 
-    def recv(self):
-        sys.stdout.flush()
-        data = self.cnn.recv(2048)
-        data = data.decode()
-        return data
 
     def send(self, msg):
         if self.is_run:
@@ -49,10 +42,10 @@ class Professor_Window(QMainWindow, form_main):
         self.initUI()
         self.t1 = SocketClient()
         self.t1.connect_cle()
-        self.t1.start()
         self.menu_widget.hide()
         self.widget_2.hide()
         self.chat_widget.hide()
+        self.t1.start()
 
         self.show()
         self.id_check = None
@@ -80,7 +73,7 @@ class Professor_Window(QMainWindow, form_main):
 
     def sign_up_exit(self):
         self.t1.send('@exit')
-        self.sign_di.setDisabled(False)
+        self.sign_id.setDisabled(False)
         self.idcheck_btn.setDisabled(False)
         self.name.clear()
         self.sign_id.clear()
@@ -121,22 +114,24 @@ class Professor_Window(QMainWindow, form_main):
 
     @pyqtSlot(str)
     def add_user(self, msg):
-        if msg.startswith == '@sign_up':
+        print(msg)
+        if msg.startswith('@sign_up'):
             msg = msg.replace('@sign_up ', '', 1)
+            print(msg)
             if msg == 'OK':
                 self.id_check = True
                 QMessageBox.about(self, '중복', '사용 가능한 아이디 입니다')
-                self.sign_di.setDisabled(True)
+                self.sign_id.setDisabled(True)
                 self.idcheck_btn.setDisabled(True)
             elif msg == 'NO':
                 self.id_check = False
                 QMessageBox.about(self, '중복', '중복된 아이디 입니다')
-                self.sign_di.setDisabled(False)
+                self.sign_id.setDisabled(False)
                 self.idcheck_btn.setDisabled(False)
             else:
                 self.id_check = False
-        elif msg.startswith == '@log_in':
-            msg = msg.replace('@log_in', '', 1)
+        elif msg.startswith('@log_in'):
+            msg = msg.replace('@log_in ', '', 1)
             if msg == 'sucess':
                 self.widget.hide()
                 self.menu_widget.show()

@@ -113,18 +113,18 @@ def log_in(clnt_num, log_in_data):
         return
     pw = c.fetchone()
     if not pw:  # 해당 id 없을시 @ID error
-        send_clnt_msg(clnt_sock, 'ID error')
+        send_clnt_msg(clnt_sock, '@log_in ID error')
         con.close()
         return
     else:  # 해당 id에 대한 pw 일치 시 @sucess send 및 clnt_imfor 갱신
         if (check_pw,) == pw:
-            send_clnt_msg(clnt_sock, 'sucess')
+            send_clnt_msg(clnt_sock, '@log_in sucess')
             clnt_imfor[clnt_num][1] = check_id
             clnt_imfor[clnt_num][3] = 1
             print('login %s, %s' % (type, check_id))
             con.close()
         else:  # id는 있지만 pw 불일치시 @PW error
-            send_clnt_msg(clnt_sock, 'PW error')
+            send_clnt_msg(clnt_sock, '@log_in PW error')
             con.close()
     return
 
@@ -300,6 +300,7 @@ def handle_clnt(clnt_sock):
 
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(('', PORT))
     sock.listen(5)
 
