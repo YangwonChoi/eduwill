@@ -254,7 +254,7 @@ border-radius: 5px}
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="sing_widget" native="true">
+   <widget class="QWidget" name="sign_widget" native="true">
     <property name="geometry">
      <rect>
       <x>250</x>
