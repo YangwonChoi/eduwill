@@ -21,6 +21,17 @@ class SocketClient(QThread):
         self.cnn.connect(('localhost', 2090))
         self.is_run = True
         self.cnn.send('tea'.encode())
+    def run(self):
+        while True:
+            data = self.cnn.recv(1024)
+            data = data.decode()
+#@sign_up중복
+            if data.startswith == '@sign_up' or data.startswith == '@log_in':
+                self.add_user.emit(data)
+
+
+            else:
+                self.add_chat.emit(data)
 
     def recv(self):
         sys.stdout.flush()
@@ -39,78 +50,105 @@ class Professor_Window(QMainWindow, form_main):
         self.t1 = SocketClient()
         self.t1.connect_cle()
         self.menu_widget.hide()
+        self.widget_2.hide()
+        self.chat_widget.hide()
+
         self.show()
         self.id_check = None
 #-----------------시그널-----------------------------
-        self.sing_up_btn.clicked.connect(self.sing_up)
-        self.back_btn.clicked.connect(self.sing_up_exit)
-        self.confirm_btn.clicked.connect(self.sing_up_cf)
+        self.sign_up_btn.clicked.connect(self.sign_up)
+        self.back_btn.clicked.connect(self.sign_up_exit)
+        self.confirm_btn.clicked.connect(self.sign_up_cf)
         self.login_btn.clicked.connect(self.login)  # 로그인 버튼 눌럿을때
         self.idcheck_btn.clicked.connect(self.overlap_id)
+        self.chat_btn.clicked.connect(self.chating)
+        self.t1.add_user.connect(self.add_user)
 
     def initUI(self):
         self.setupUi(self)
-        self.sing_widget.hide()
-        self.sing_pw.setEchoMode(QLineEdit.Password)
-        self.sing_pw_2.setEchoMode(QLineEdit.Password)
+        self.sign_widget.hide()
+        self.sign_pw.setEchoMode(QLineEdit.Password)
+        self.sign_pw_2.setEchoMode(QLineEdit.Password)
         self.login_pw.setEchoMode(QLineEdit.Password)
-   
 
 
-    def sing_up(self):
+
+    def sign_up(self):
         self.t1.send("@sign_up")
-        self.sing_widget.show()
+        self.sign_widget.show()
 
-    def sing_up_exit(self):
+    def sign_up_exit(self):
         self.t1.send('@exit')
-        self.sing_di.setDisabled(False)
+        self.sign_di.setDisabled(False)
         self.idcheck_btn.setDisabled(False)
         self.name.clear()
-        self.sing_di.clear()
-        self.sing_pw.clear()
-        self.sing_pw_2.clear()
-        self.sing_widget.close()
+        self.sign_id.clear()
+        self.sign_pw.clear()
+        self.sign_pw_2.clear()
+        self.sign_widget.close()
     def overlap_id(self):
-        id = self.sing_di.text()
+        id = self.sign_id.text()
         sys.stdin.flush()
         self.t1.send(id)
-        msg = self.t1.recv()
 
-        if msg == 'OK':
-            self.id_check = True
-            QMessageBox.about(self, '중복', '사용 가능한 아이디 입니다')
-            self.sing_di.setDisabled(True)
-            self.idcheck_btn.setDisabled(True)
-
-        elif msg == 'NO':
-            self.id_check = False
-            QMessageBox.about(self, '중복', '중복된 아이디 입니다')
-            self.sing_di.setDisabled(False)
-            self.idcheck_btn.setDisabled(False)
-        else:
-            self.id_check = False
-    def sing_up_cf(self):
-        sing_check = True
-        if self.sing_pw.text() != self.sing_pw_2.text():
-            sing_check = False
+    def sign_up_cf(self):
+        sign_check = True
+        if self.sign_pw.text() != self.sign_pw_2.text():
+            sign_check = False
         if not self.id_check:
-            sing_check = False
+            sign_check = False
 
-        if not sing_check:
+        if not sign_check:
             QMessageBox.about(self, '경고', '잘못된 양식 입니다')
         else:
 
-            self.t1.send(f"{self.sing_di.text()}/{self.sing_pw.text()}/{self.name.text()}")
+            self.t1.send(f"{self.sign_id.text()}/{self.sign_pw.text()}/{self.name.text()}")
             self.name.clear()
-            self.sing_di.clear()
-            self.sing_pw.clear()
-            self.sing_pw_2.clear()
-            self.sing_widget.close()
+            self.sign_id.clear()
+            self.sign_pw.clear()
+            self.sign_pw_2.clear()
+            self.sign_widget.close()
 
     def login(self):  # 로그인 버튼 눌럿을때
         self.t1.send(f"@log_in/{self.login_id.text()}/{self.login_pw.text()}")
-        check = self.t1.recv()
-        print(check)
+
+    def chating(self):
+        self.menu_widget.hide()
+        self.t1.send("@member")
+        #리시브받아서 리스트위젯에 넣어야함
+        self.widget_2.show()
+
+    @pyqtSlot(str)
+    def add_user(self, msg):
+        if msg.startswith == '@sign_up':
+            msg = msg.replace('@sign_up', '', 1)
+            if msg == 'OK':
+                self.id_check = True
+                QMessageBox.about(self, '중복', '사용 가능한 아이디 입니다')
+                self.sign_di.setDisabled(True)
+                self.idcheck_btn.setDisabled(True)
+            elif msg == 'NO':
+                self.id_check = False
+                QMessageBox.about(self, '중복', '중복된 아이디 입니다')
+                self.sign_di.setDisabled(False)
+                self.idcheck_btn.setDisabled(False)
+            else:
+                self.id_check = False
+        elif msg.startswith == '@log_in':
+            msg = msg.replace('@log_in', '', 1)
+            if msg == 'sucess':
+                self.widget.hide()
+                self.menu_widget.show()
+            elif msg == 'ID error':
+                QMessageBox.about(self, '경고', '아이디가 잘못 되었습니다')
+                self.login_id.clear()
+                self.login_pw.clear()
+
+            else:
+                QMessageBox.about(self, '경고', '비밀번호가 잘못 되었습니다')
+                self.login_id.clear()
+                self.login_pw.clear()
+
 
 
 if __name__ == "__main__":
