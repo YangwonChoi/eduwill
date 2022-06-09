@@ -57,7 +57,7 @@ border-radius: 25px;
       <string>PW</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="login_di">
+    <widget class="QLineEdit" name="login_id">
      <property name="geometry">
       <rect>
        <x>200</x>
@@ -210,7 +210,7 @@ border-radius: 20px}
       <string>Login</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="sing_up_btn">
+    <widget class="QPushButton" name="sign_up_btn">
      <property name="geometry">
       <rect>
        <x>340</x>
@@ -254,7 +254,7 @@ border-radius: 5px}
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="sing_widget" native="true">
+   <widget class="QWidget" name="sign_widget" native="true">
     <property name="geometry">
      <rect>
       <x>250</x>
@@ -310,7 +310,7 @@ color: black;
 </string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="sing_di">
+    <widget class="QLineEdit" name="sign_id">
      <property name="geometry">
       <rect>
        <x>250</x>
@@ -339,7 +339,7 @@ color: black;
       <string>회원가입</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="sing_pw">
+    <widget class="QLineEdit" name="sign_pw">
      <property name="geometry">
       <rect>
        <x>250</x>
@@ -471,7 +471,7 @@ border-radius: 20px}
       <string>PW 확인</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="sing_pw_2">
+    <widget class="QLineEdit" name="sign_pw_2">
      <property name="geometry">
       <rect>
        <x>250</x>
