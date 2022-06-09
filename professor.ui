@@ -210,7 +210,7 @@ border-radius: 20px}
       <string>Login</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="sing_up_btn">
+    <widget class="QPushButton" name="sign_up_btn">
      <property name="geometry">
       <rect>
        <x>340</x>
@@ -313,7 +313,7 @@ color: black;
       <string/>
      </property>
     </widget>
-    <widget class="QLineEdit" name="sing_di">
+    <widget class="QLineEdit" name="sign_id">
      <property name="geometry">
       <rect>
        <x>250</x>
@@ -342,7 +342,7 @@ color: black;
       <string>회원가입</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="sing_pw">
+    <widget class="QLineEdit" name="sign_pw">
      <property name="geometry">
       <rect>
        <x>250</x>
@@ -461,7 +461,7 @@ border-radius: 20px}
       <string>중복확인</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="sing_pw_2">
+    <widget class="QLineEdit" name="sign_pw_2">
      <property name="geometry">
       <rect>
        <x>250</x>
@@ -498,7 +498,7 @@ color: black;
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>40</y>
+      <y>70</y>
       <width>1091</width>
       <height>511</height>
      </rect>
@@ -589,7 +589,7 @@ color: black;
       </item>
       <item row="2" column="2">
        <widget class="QWidget" name="widget_6" native="true">
-        <widget class="QPushButton" name="pushButton_4">
+        <widget class="QPushButton" name="chat_btn">
          <property name="geometry">
           <rect>
            <x>-10</x>
@@ -634,18 +634,398 @@ color: black;
      </layout>
     </widget>
    </widget>
+   <widget class="QWidget" name="chat_widget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>30</y>
+      <width>511</width>
+      <height>571</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(238, 238, 236);</string>
+    </property>
+    <widget class="QTextBrowser" name="textBrowser">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>60</y>
+       <width>451</width>
+       <height>391</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="send_btn">
+     <property name="geometry">
+      <rect>
+       <x>380</x>
+       <y>470</y>
+       <width>101</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Sans</family>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>보내기</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_9">
+     <property name="geometry">
+      <rect>
+       <x>50</x>
+       <y>10</y>
+       <width>151</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>상담</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="text_input">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>470</y>
+       <width>331</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="login_btn_2">
+     <property name="geometry">
+      <rect>
+       <x>470</x>
+       <y>10</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="palette">
+      <palette>
+       <active>
+        <colorrole role="Button">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Base">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Window">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="Button">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Base">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Window">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="Button">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Base">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Window">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton{
+background-color: rgb(136, 138, 133);
+border-style: solid;
+border-radius: 15px
+}
+QPushButton:hover{
+background-color: rgb(180, 255, 255);
+border-style: solid;
+border-radius: 15px}
+
+QPushButton:pressed{
+background-color: rgb(100, 255, 255);
+border-style: solid;
+border-radius: 15px}
+</string>
+     </property>
+     <property name="text">
+      <string>X</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="widget_2" native="true">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>80</y>
+      <width>291</width>
+      <height>391</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(238, 238, 236);
+border-style: solid;
+border-width: 2px;
+border-color: balck;</string>
+    </property>
+    <widget class="QLabel" name="label_10">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>10</y>
+       <width>151</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border-style: solid;
+border-width: 0px;
+border-color: balck;</string>
+     </property>
+     <property name="text">
+      <string>현재 접속중인 학생</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="exit_st">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>10</y>
+       <width>21</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="palette">
+      <palette>
+       <active>
+        <colorrole role="Button">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Base">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Window">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </active>
+       <inactive>
+        <colorrole role="Button">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Base">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Window">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </inactive>
+       <disabled>
+        <colorrole role="Button">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Base">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="Window">
+         <brush brushstyle="SolidPattern">
+          <color alpha="255">
+           <red>136</red>
+           <green>138</green>
+           <blue>133</blue>
+          </color>
+         </brush>
+        </colorrole>
+       </disabled>
+      </palette>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton{
+background-color: rgb(136, 138, 133);
+border-style: solid;
+border-radius: 15px
+}
+QPushButton:hover{
+background-color: rgb(180, 255, 255);
+border-style: solid;
+border-radius: 15px}
+
+QPushButton:pressed{
+background-color: rgb(100, 255, 255);
+border-style: solid;
+border-radius: 15px}
+</string>
+     </property>
+     <property name="text">
+      <string>X</string>
+     </property>
+    </widget>
+    <widget class="QWidget" name="verticalLayoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>40</y>
+       <width>291</width>
+       <height>301</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QListWidget" name="listWidget"/>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QPushButton" name="pushButton_4">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>350</y>
+       <width>89</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton{
+background-color: rgb(136, 138, 133);
+border-style: solid;
+border-radius: 15px
+}
+QPushButton:hover{
+background-color: rgb(180, 255, 255);
+border-style: solid;
+border-radius: 15px}
+
+QPushButton:pressed{
+background-color: rgb(100, 255, 255);
+border-style: solid;
+border-radius: 15px}
+</string>
+     </property>
+     <property name="text">
+      <string>연결하기</string>
+     </property>
+    </widget>
+   </widget>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1091</width>
-     <height>28</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
  <connections/>
