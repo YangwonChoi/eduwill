@@ -908,7 +908,7 @@ border-radius: 15px}
       <string/>
      </property>
     </widget>
-    <widget class="QPushButton" name="chat_exit_bt_2">
+    <widget class="QPushButton" name="chat_exit_bt">
      <property name="geometry">
       <rect>
        <x>470</x>
