@@ -27,26 +27,26 @@ class SocketClient(QThread):
             data = data.decode()
             print(data)
 
-            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member'):
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat'):
                 self.add_user.emit(data)
 
 
             else:
-                pass
+                print('이상한메세지',data)
 
 
     def send(self, msg):
         if self.is_run:
             self.cnn.send(f'{msg}'.encode())
-    def chat(self, msg):
-        if self.is_run:
-            self.cnn.send(f'@caht {msg}'.encode())
+            print('보낸메세지 ',msg)
+
+
 
 class Professor_Window(QMainWindow, form_main):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.t1 = SocketClient()
+        self.t1 = SocketClient(self)
         self.t1.connect_cle()
         self.menu_widget.hide()
         self.select_widget.hide()
@@ -119,7 +119,7 @@ class Professor_Window(QMainWindow, form_main):
     def chating(self):
         self.menu_widget.hide()
         self.t1.send("@member")
-        #리시브받아서 리스트위젯에 넣어야함
+
         self.conect_btn.setDisabled(True)
         self.select_widget.show()
 
@@ -165,13 +165,13 @@ class Professor_Window(QMainWindow, form_main):
                 self.listWidget.addItem(f'{i}')
         elif msg.startswith('@chat'):
             msg = msg.replace('@chat ', '', 1)
-            self.chats.append(msg)
+            self.chat_bro.append(msg)
 
 
 
     def connect_chat(self):
         self.chat_bro.clear()
-        self.t1.send(f"@chat {self.listWidget.currentItem().text()}")
+        self.t1.send(f"@chat/{self.listWidget.currentItem().text()}")
         self.select_widget.hide()
         self.chat_widget.show()
 
