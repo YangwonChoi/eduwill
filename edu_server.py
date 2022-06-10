@@ -259,6 +259,25 @@ def set_chat_state(clnt_num):           #수정 필요
     return
 
 
+
+def send_stu_list(clnt_num):
+    con, c = get_DBcursor()
+    name_list = []
+    for i in range(0, clnt_cnt):
+        if clnt_imfor[i][2] == 'stu' and clnt_imfor[i][3] == 1:
+            c.execute('SELECT Name FROM studentTBL WHERE ID=?', (clnt_imfor[i][1], ))
+            print(clnt_imfor[i][1])
+            name_data = c.fetchone()
+            print(name_data)
+            name_data = ''.join(name_data)
+            name_list.append(name_data)
+            print(name_data)
+    send_data = '/'.join(name_list)
+    send_clnt_msg(clnt_imfor[clnt_num][0], ('@member ' + send_data))
+    con.close()
+    return
+
+
 def call_func(clnt_num, instruction):
     if instruction == 'sign_up':
         sign_up(clnt_num)
@@ -270,6 +289,8 @@ def call_func(clnt_num, instruction):
         QA_ctrl_func(clnt_num)
     elif instruction == 'chat':
         set_chat_state(clnt_num, instruction)
+    elif instruction == 'member':
+        send_stu_list(clnt_num)
     else:
         return
 

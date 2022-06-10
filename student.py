@@ -1,11 +1,9 @@
-import imp
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
 from PyQt5 import QtCore
 from PyQt5.QtCore import QThread, pyqtSlot
 from socket import *
-import sys
 
 form_stu = uic.loadUiType("student.ui")[0]
 
@@ -21,19 +19,26 @@ class SocketClient(QThread):
 
     def connect_cle(self):
         self.cnn = socket(AF_INET, SOCK_STREAM)
-        self.cnn.connect(('127.0.0.1', 2090))
+        self.cnn.connect(('localhost', 2090))
         self.is_run = True
         self.cnn.send('stu'.encode())
 
-    def recv(self):
-        sys.stdout.flush()
-        data = self.cnn.recv(2048)
-        data = data.decode()
+    def run(self):
+        while True:
+            data = self.cnn.recv(1024)
+            data = data.decode()
+            print(data)
+
+            if data.startswith('@sign_up') or data.startswith('@log_in'):
+                self.add_user.emit(data)
 
     def send(self, msg):
         if self.is_run:
-            sys.stdin.flush()
             self.cnn.send(f'{msg}'.encode())
+
+    def chat(self, msg):
+        if self.is_run:
+            self.cnn.send(f'@caht {msg}'.encode())
 
 
 class Student_Window(QMainWindow, form_stu):
@@ -45,26 +50,19 @@ class Student_Window(QMainWindow, form_stu):
         self.t1.start()
         self.show()
         # -----------------시그널-----------------------------
-        self.sign_up_btn.clicked.connect(self.sign_up)  # sign_up버튼 눌럿을떄
-        self.back_btn.clicked.connect(self.sign_up_exit)  # 취소버튼 눌럿을떄
-        self.confirm_btn.clicked.connect(self.sign_up_cf)  # 확인버튼 눌럿을떄
-        self.login_btn.clicked.connect(self.login) #로그인 버튼 눌럿을때
-        self.idcheck_btn.clicked.connect(self.check_id)
-
-    def check_id(self):
-        id = self.sign_id.text()
-        self.t1.send(id)
-        msg = self.t1.recv()
-        if msg == 'OK':
-            pass
-        elif msg == 'NO':
-            pass
-        else:
-            pass
+        self.sign_up_btn.clicked.connect(self.sign_up) #sign_up버튼 눌렀을때
+        self.back_btn.clicked.connect(self.sign_up_exit) #취소버튼 눌렀을때
+        self.confirm_btn.clicked.connect(self.sign_up_cf) #확인버튼 눌렀을때
+        self.login_btn.clicked.connect(self.login)  # 로그인 버튼 눌럿을때
+        self.idcheck_btn.clicked.connect(self.overlap_id)
+        self.t1.add_user.connect(self.add_user)
 
     def initUI(self):
         self.setupUi(self)
         self.sign_widget.hide()
+        self.menu_widget.hide()
+        self.learn_widget.hide()
+        self.chat_widget.hide()
         self.sign_pw.setEchoMode(QLineEdit.Password)
         self.sign_pw_2.setEchoMode(QLineEdit.Password)
         self.login_pw.setEchoMode(QLineEdit.Password)
@@ -74,27 +72,75 @@ class Student_Window(QMainWindow, form_stu):
         self.sign_widget.show()
 
     def sign_up_exit(self):  # 취소버튼 눌럿을떄
+        self.t1.send('@exit')
+        self.sign_id.setDisabled(False)
+        self.idcheck_btn.setDisabled(False)
         self.name.clear()
         self.sign_id.clear()
         self.sign_pw.clear()
         self.sign_pw_2.clear()
         self.sign_widget.close()
 
-    def sign_up_cf(self): #확인 눌럿을때
+    def overlap_id(self):
+        id = self.sign_id.text()
+        sys.stdin.flush()
+        self.t1.send(id)
+
+    def sign_up_cf(self):
+        sign_check = True
         if self.sign_pw.text() != self.sign_pw_2.text():
-            pass
+            sign_check = False
+        if not self.id_check:
+            sign_check = False
+
+        if not sign_check:
+            QMessageBox.about(self, '경고', '잘못된 양식 입니다')
         else:
-            data = self.sign_id.text() + '/' + self.sign_pw.text() + '/' + self.name.text()
-            self.t1.send(data)
+            self.t1.send(f"{self.sign_id.text()}/{self.sign_pw.text()}/{self.name.text()}")
+            self.name.clear()
+            self.sign_id.clear()
+            self.sign_pw.clear()
+            self.sign_pw_2.clear()
             self.sign_widget.close()
 
-
     def login(self): #로그인 버튼 눌럿을때
-        pass
+        self.t1.send(f"@log_in/{self.login_id.text()}/{self.login_pw.text()}")
+
+
+    @pyqtSlot(str)
+    def add_user(self, msg):
+
+        if msg.startswith('@sign_up'):
+            msg = msg.replace('@sign_up ', '', 1)
+
+            if msg == 'OK':
+                self.id_check = True
+                QMessageBox.about(self, '중복', '사용 가능한 아이디 입니다')
+                self.sign_id.setDisabled(True)
+                self.idcheck_btn.setDisabled(True)
+            elif msg == 'NO':
+                self.id_check = False
+                QMessageBox.about(self, '중복', '중복된 아이디 입니다')
+                self.sign_id.setDisabled(False)
+                self.idcheck_btn.setDisabled(False)
+            else:
+                self.id_check = False
+        elif msg.startswith('@log_in'):
+            msg = msg.replace('@log_in ', '', 1)
+            if msg == 'sucess':
+                self.login_widget.hide()
+                self.menu_widget.show()
+            elif msg == 'ID error':
+                QMessageBox.about(self, '경고', '아이디가 잘못 되었습니다')
+                self.login_id.clear()
+                self.login_pw.clear()
+            else:
+                QMessageBox.about(self, '경고', '비밀번호가 잘못 되었습니다')
+                self.login_id.clear()
+                self.login_pw.clear()
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Student_Window()
-    win.show()
     sys.exit(app.exec())
