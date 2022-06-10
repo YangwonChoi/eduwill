@@ -144,7 +144,7 @@ def QnA_ctrl_func(clnt_num):  # Q&A 관련 함수 작성중
                 row = list(row)
                 row[0] = str(row[0])
                 row = '/'.join(row)
-                send_clnt_msg(clnt_imfor[clnt_num][0], row)
+                send_clnt_msg(clnt_imfor[clnt_num][0], ('@QnA ' + row))
             send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA done')
         while True:  #클라이언트에서 quit 보내기 전 까지 계속 질문 받음
             msg = recv_clnt_msg(clnt_imfor[clnt_num][0])
@@ -168,7 +168,7 @@ def QnA_ctrl_func(clnt_num):  # Q&A 관련 함수 작성중
                 row = list(row)
                 row[0] = str(row[0])
                 row = '/'.join(row)
-                send_clnt_msg(clnt_imfor[clnt_num][0], row)
+                send_clnt_msg(clnt_imfor[clnt_num][0], ('@QnA ' + row))
             send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA done')
         while True:
             msg = recv_clnt_msg(clnt_imfor[clnt_num][0])
@@ -195,7 +195,7 @@ def set_questions(clnt_num, question):  # 문제출제 함수
         con.close()
         return
     else:  # 과목/문제/정답 삽입
-        c.execute('SELECT * FROM QuizTBL')
+        c.execute('SELECT * FROM QuizTBL WHERE Subject=?', (question[1]))
         rows = c.fetchall()
         rows = list(rows)
         for row in rows:
@@ -212,6 +212,7 @@ def set_questions(clnt_num, question):  # 문제출제 함수
         # con.commit()
         # con.close()
         # lock.release()
+    con.close()
     return
 
 
@@ -261,9 +262,9 @@ def set_chat_state(clnt_num, name):           #수정 필요
         tea_id = ''.join(tea_id)
         for i in range(0, clnt_cnt):
             if clnt_imfor[i][2] == 'tea' and clnt_imfor[i][1] == tea_id and clnt_imfor[i][3] == 1:
-                send_clnt_msg(clnt_imfor[i][0], '@chat invite')
+                send_clnt_msg(clnt_imfor[i][0], '@invite')
                 msg = recv_clnt_msg(clnt_imfor[i][0])
-                if msg == '@chat OK':
+                if msg == '@invite OK':
                     clnt_imfor[clnt_num][3] = room_num
                     clnt_imfor[i][3] = room_num
                     room_num = room_num + 1
@@ -271,7 +272,7 @@ def set_chat_state(clnt_num, name):           #수정 필요
                     con.close()
                     return
                 elif msg == '@chat NO':
-                    send_clnt_msg(clnt_imfor[clnt_num][0], '@chat NO')
+                    send_clnt_msg(clnt_imfor[clnt_num][0], '@invite NO')
                     con.close()
                     return
     elif clnt_imfor[clnt_num][2] == 'tea':
@@ -284,9 +285,9 @@ def set_chat_state(clnt_num, name):           #수정 필요
         stu_id = ''.join(stu_id)
         for i in range(0, clnt_cnt):
             if clnt_imfor[i][2] == 'tea' and clnt_imfor[i][1] == stu_id and clnt_imfor[i][3] == 1:
-                send_clnt_msg(clnt_imfor[i][0], '@chat invite')
+                send_clnt_msg(clnt_imfor[i][0], '@invite')
                 msg = recv_clnt_msg(clnt_imfor[i][0])
-                if msg == '@chat OK':
+                if msg == '@invite OK':
                     clnt_imfor[clnt_num][3] = room_num
                     clnt_imfor[i][3] = room_num
                     room_num = room_num + 1
@@ -294,7 +295,7 @@ def set_chat_state(clnt_num, name):           #수정 필요
                     con.close()
                     return
                 elif msg == '@chat NO':
-                    send_clnt_msg(clnt_imfor[clnt_num][0], '@chat NO')
+                    send_clnt_msg(clnt_imfor[clnt_num][0], '@invite NO')
                     con.close()
                     return
     else:
@@ -338,7 +339,7 @@ def call_func(clnt_num, instruction):
         sign_up(clnt_num)
     elif instruction.startswith('log_in'):
         log_in(clnt_num, instruction)
-    elif instruction == 'set_q':
+    elif instruction.startswith('set_q'):
         set_questions(clnt_num, instruction)
     elif instruction == 'QnA':
         QnA_ctrl_func(clnt_num)
