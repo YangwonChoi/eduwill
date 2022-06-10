@@ -238,6 +238,7 @@ def set_chat_state(clnt_num, name):           #수정 필요
     global room_num
     con, c = get_DBcursor()
     name = name.replace('chat/', '')
+    send_clnt_msg(clnt_imfor[clnt_num][0], '@chat 서버메세지 : 연결중입니다.')
     if clnt_imfor[clnt_num][2] == 'stu':  # 학생이 채팅요청 했을 경우
         c.execute('SELECT ID FROM teacherTBL WHERE Name=?', (name, ))
         tea_id = c.fetchone()
