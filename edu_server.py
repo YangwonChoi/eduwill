@@ -204,7 +204,7 @@ def set_questions(clnt_num, question):  # 문제출제 함수
             row[4] = str(row[4])
             row[5] = str(row[5])
             row = '/'.join(row)
-            send_clnt_msg(clnt_imfor[clnt_num][0], row)
+            send_clnt_msg(clnt_imfor[clnt_num][0], ('@set_q ' + row))
         send_clnt_msg(clnt_imfor[clnt_num][0], '@set_q done')
         # lock.acquire
         # c.executemany(
