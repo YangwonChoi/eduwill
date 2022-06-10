@@ -333,7 +333,7 @@ def call_func(clnt_num, instruction):
         set_questions(clnt_num, instruction)
     elif instruction.startswith('Q&A'):
         QA_ctrl_func(clnt_num)
-    elif instruction == 'chat':
+    elif instruction.startswith('chat'):
         set_chat_state(clnt_num, instruction)
     elif instruction == 'member':
         send_list(clnt_num)
