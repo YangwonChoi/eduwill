@@ -131,24 +131,24 @@ def log_in(clnt_num, log_in_data):
     return
 
 
-def QA_ctrl_func(clnt_num):  # Q&A 관련 함수 작성중
+def QnA_ctrl_func(clnt_num):  # Q&A 관련 함수 작성중
     con, c = get_DBcursor()
     type = clnt_imfor[clnt_num][2]
     if type == 'stu':
         c.execute('SELECT * FROM Q&ATBL WHERE ID=?', (clnt_imfor[clnt_num][1],))
         rows = c.fetchall()
         if not c:  #등록된 질문 없을 시 X send
-            send_clnt_msg(clnt_imfor[clnt_num][0], 'X')
+            send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA empty')
         else:  #질문 등록돼있으면 리스트 다 보내줌
             for row in rows:
                 row = list(row)
                 row[0] = str(row[0])
                 row = '/'.join(row)
                 send_clnt_msg(clnt_imfor[clnt_num][0], row)
-            send_clnt_msg(clnt_imfor[clnt_num][0], 'done')
+            send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA done')
         while True:  #클라이언트에서 quit 보내기 전 까지 계속 질문 받음
             msg = recv_clnt_msg(clnt_imfor[clnt_num][0])
-            if msg == 'quit':
+            if msg == '@exit':
                 con.close()
                 return
             else:
@@ -160,7 +160,7 @@ def QA_ctrl_func(clnt_num):  # Q&A 관련 함수 작성중
         c.execute('SELECT * FROM Q&ATBL')
         rows = c.fetchall()
         if not c:  #등록된 질문 없을 시 X send
-            send_clnt_msg(clnt_imfor[clnt_num][0], 'X')
+            send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA empty')
             con.close()
             return
         else:
@@ -169,10 +169,10 @@ def QA_ctrl_func(clnt_num):  # Q&A 관련 함수 작성중
                 row[0] = str(row[0])
                 row = '/'.join(row)
                 send_clnt_msg(clnt_imfor[clnt_num][0], row)
-            send_clnt_msg(clnt_imfor[clnt_num][0], 'done')
+            send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA done')
         while True:
             msg = recv_clnt_msg(clnt_imfor[clnt_num][0])
-            if msg == 'quit':
+            if msg == '@exit':
                 con.close()
                 break
             else:
@@ -195,12 +195,23 @@ def set_questions(clnt_num, question):  # 문제출제 함수
         con.close()
         return
     else:  # 과목/문제/정답 삽입
-        lock.acquire
-        c.executemany(
-            "INSERT INTO quizTBL(Subject, Quiz, Answer) VALUES(?, ?, ?)", (question,))
-        con.commit()
-        con.close()
-        lock.release()
+        c.execute('SELECT * FROM QuizTBL')
+        rows = c.fetchall()
+        rows = list(rows)
+        for row in rows:
+            row = list(row)
+            row[0] = str(row[0])
+            row[4] = str(row[4])
+            row[5] = str(row[5])
+            row = '/'.join(row)
+            send_clnt_msg(clnt_imfor[clnt_num][0], row)
+        send_clnt_msg(clnt_imfor[clnt_num][0], '@set_q done')
+        # lock.acquire
+        # c.executemany(
+        #     "INSERT INTO quizTBL(Subject, Quiz, Answer) VALUES(?, ?, ?)", (question,))
+        # con.commit()
+        # con.close()
+        # lock.release()
     return
 
 
@@ -291,6 +302,7 @@ def set_chat_state(clnt_num, name):           #수정 필요
         con.close()
         return
 
+
 def send_list(clnt_num):
     con, c = get_DBcursor()
     name_list = []
@@ -326,10 +338,10 @@ def call_func(clnt_num, instruction):
         sign_up(clnt_num)
     elif instruction.startswith('log_in'):
         log_in(clnt_num, instruction)
-    elif instruction.startswith('set_q'):
+    elif instruction == 'set_q':
         set_questions(clnt_num, instruction)
-    elif instruction.startswith('Q&A'):
-        QA_ctrl_func(clnt_num)
+    elif instruction == 'QnA':
+        QnA_ctrl_func(clnt_num)
     elif instruction.startswith('chat'):
         set_chat_state(clnt_num, instruction)
     elif instruction == 'member':
