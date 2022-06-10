@@ -218,14 +218,14 @@ def get_chat(clnt_num):
     
     while True:
         msg = recv_clnt_msg(clnt_imfor[clnt_num][0])
-        if msg == '@chat exit':
+        if msg == '@exit':
             for i in range(0, clnt_cnt):
                 if clnt_imfor[clnt_num][3] == clnt_imfor[i][3]:
-                    send_clnt_msg(clnt_imfor[i][0], ('@chat %s님이 채팅방을 나갔습니다.' %clnt_name))
+                    send_clnt_msg(clnt_imfor[i][0], ('@chat [%s]님이 채팅방을 나갔습니다.' %clnt_name))
             clnt_imfor[clnt_num][3] = 1
             break
         else:
-            msg = msg.replace('@chat ', ('@chat %s ' %clnt_name))
+            msg = msg.replace('@chat ', ('@chat [%s] ' %clnt_name))
             for i in range(0, clnt_cnt):
                 if clnt_imfor[clnt_num][3] == clnt_imfor[i][3]:
                     send_clnt_msg(clnt_imfor[i][0], msg)
