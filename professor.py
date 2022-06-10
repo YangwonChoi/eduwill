@@ -27,12 +27,12 @@ class SocketClient(QThread):
             data = data.decode()
             print(data)
 
-            if data.startswith('@sign_up') or data.startswith('@log_in'):
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member'):
                 self.add_user.emit(data)
 
 
             else:
-                self.add_chat.emit(data)
+                pass
 
 
     def send(self, msg):
@@ -53,7 +53,7 @@ class Professor_Window(QMainWindow, form_main):
         self.chat_widget.hide()
 
         self.t1.start()
-        self.listWidget.addItem('String')####################################
+
         self.show()
         self.id_check = None
 #-----------------시그널-----------------------------
@@ -82,7 +82,7 @@ class Professor_Window(QMainWindow, form_main):
         self.sign_widget.show()
 
     def sign_up_exit(self):
-        self.t1.send('@exit')
+        self.t1.send('exit')
         self.sign_id.setDisabled(False)
         self.idcheck_btn.setDisabled(False)
         self.name.clear()
@@ -158,12 +158,24 @@ class Professor_Window(QMainWindow, form_main):
                 QMessageBox.about(self, '경고', '비밀번호가 잘못 되었습니다')
             self.login_id.clear()
             self.login_pw.clear()
+        elif msg.startswith('@member'):
+            msg = msg.replace('@member ', '', 1)
+            self.listWidget.clear()
+            for i in msg.split('/'):
+                self.listWidget.addItem(f'{i}')
+        elif msg.startswith('@chat'):
+            msg = msg.replace('@chat ', '', 1)
+            self.chats.append(msg)
+
 
 
     def connect_chat(self):
-        print(self.listWidget.currentItem().text())
+        self.chat_bro.clear()
+        self.t1.send(f"@chat {self.listWidget.currentItem().text()}")
         self.select_widget.hide()
         self.chat_widget.show()
+
+
 
 
 

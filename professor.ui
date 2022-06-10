@@ -846,7 +846,7 @@ border-radius: 15px}
     <property name="styleSheet">
      <string notr="true">background-color: rgb(238, 238, 236);</string>
     </property>
-    <widget class="QTextBrowser" name="chat_bro_2">
+    <widget class="QTextBrowser" name="chat_bro">
      <property name="geometry">
       <rect>
        <x>30</x>
