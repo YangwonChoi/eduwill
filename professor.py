@@ -27,33 +27,33 @@ class SocketClient(QThread):
             data = data.decode()
             print(data)
 
-            if data.startswith('@sign_up') or data.startswith('@log_in'):
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat'):
                 self.add_user.emit(data)
 
 
             else:
-                self.add_chat.emit(data)
+                print('이상한메세지',data)
 
 
     def send(self, msg):
         if self.is_run:
             self.cnn.send(f'{msg}'.encode())
-    def chat(self, msg):
-        if self.is_run:
-            self.cnn.send(f'@caht {msg}'.encode())
+            print('보낸메세지 ',msg)
+
+
 
 class Professor_Window(QMainWindow, form_main):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.t1 = SocketClient()
+        self.t1 = SocketClient(self)
         self.t1.connect_cle()
         self.menu_widget.hide()
         self.select_widget.hide()
         self.chat_widget.hide()
 
         self.t1.start()
-        self.listWidget.addItem('String')####################################
+
         self.show()
         self.id_check = None
 #-----------------시그널-----------------------------
@@ -67,6 +67,7 @@ class Professor_Window(QMainWindow, form_main):
         self.exit_st.clicked.connect(self.connect_exit)
         self.conect_btn.clicked.connect(self.connect_chat)
         self.listWidget.itemClicked.connect(lambda: self.conect_btn.setDisabled(False))
+        self.chat_exit_bt.clicked.connect(self.connect_exit)
 
     def initUI(self):
         self.setupUi(self)
@@ -82,7 +83,7 @@ class Professor_Window(QMainWindow, form_main):
         self.sign_widget.show()
 
     def sign_up_exit(self):
-        self.t1.send('@exit')
+        self.t1.send('exit')
         self.sign_id.setDisabled(False)
         self.idcheck_btn.setDisabled(False)
         self.name.clear()
@@ -119,13 +120,14 @@ class Professor_Window(QMainWindow, form_main):
     def chating(self):
         self.menu_widget.hide()
         self.t1.send("@member")
-        #리시브받아서 리스트위젯에 넣어야함
+
         self.conect_btn.setDisabled(True)
         self.select_widget.show()
 
     def connect_exit(self):
         self.t1.send("@exit")
         self.select_widget.hide()
+        self.chat_widget.hide()
         self.menu_widget.show()
 
     @pyqtSlot(str)
@@ -158,12 +160,26 @@ class Professor_Window(QMainWindow, form_main):
                 QMessageBox.about(self, '경고', '비밀번호가 잘못 되었습니다')
             self.login_id.clear()
             self.login_pw.clear()
+        elif msg.startswith('@member'):
+            msg = msg.replace('@member ', '', 1)
+            self.listWidget.clear()
+            for i in msg.split('/'):
+                self.listWidget.addItem(f'{i}')
+        elif msg.startswith('@chat'):
+            msg = msg.replace('@chat ', '', 1)
+            self.chat_bro.append(msg)
 
+    def closeEvent(self, event):
+        self.t1.send("@exit")
+        event.accept()
 
     def connect_chat(self):
-        print(self.listWidget.currentItem().text())
+        self.chat_bro.clear()
+        self.t1.send(f"@chat/{self.listWidget.currentItem().text()}")
         self.select_widget.hide()
         self.chat_widget.show()
+
+
 
 
 
@@ -172,4 +188,3 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Professor_Window()
     sys.exit(app.exec())
-

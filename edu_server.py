@@ -41,6 +41,7 @@ def delete_imfor(clnt_sock):
                 i += 1
             break
     clnt_cnt -= 1
+    clnt_sock.close()
 
 
 def sign_up(clnt_num):
@@ -247,7 +248,6 @@ def set_chat_state(clnt_num, name):           #수정 필요
             con.close()
             return
         tea_id = ''.join(tea_id)
-        lock.acquire()
         for i in range(0, clnt_cnt):
             if clnt_imfor[i][2] == 'tea' and clnt_imfor[i][1] == tea_id and clnt_imfor[i][3] == 1:
                 send_clnt_msg(clnt_imfor[i][0], '@chat invite')
@@ -256,7 +256,6 @@ def set_chat_state(clnt_num, name):           #수정 필요
                     clnt_imfor[clnt_num][3] = room_num
                     clnt_imfor[i][3] = room_num
                     room_num = room_num + 1
-                    lock.release()
                     get_chat(clnt_num, room_num)
                     con.close()
                     return
@@ -272,7 +271,6 @@ def set_chat_state(clnt_num, name):           #수정 필요
             con.close()
             return
         stu_id = ''.join(stu_id)
-        lock.acquire()
         for i in range(0, clnt_cnt):
             if clnt_imfor[i][2] == 'tea' and clnt_imfor[i][1] == stu_id and clnt_imfor[i][3] == 1:
                 send_clnt_msg(clnt_imfor[i][0], '@chat invite')
@@ -281,7 +279,6 @@ def set_chat_state(clnt_num, name):           #수정 필요
                     clnt_imfor[clnt_num][3] = room_num
                     clnt_imfor[i][3] = room_num
                     room_num = room_num + 1
-                    lock.release()
                     get_chat(clnt_num, room_num)
                     con.close()
                     return
