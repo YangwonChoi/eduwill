@@ -67,6 +67,7 @@ class Professor_Window(QMainWindow, form_main):
         self.exit_st.clicked.connect(self.connect_exit)
         self.conect_btn.clicked.connect(self.connect_chat)
         self.listWidget.itemClicked.connect(lambda: self.conect_btn.setDisabled(False))
+        self.chat_exit_bt.clicked.connect(self.connect_exit)
 
     def initUI(self):
         self.setupUi(self)
@@ -126,6 +127,7 @@ class Professor_Window(QMainWindow, form_main):
     def connect_exit(self):
         self.t1.send("@exit")
         self.select_widget.hide()
+        self.chat_widget.hide()
         self.menu_widget.show()
 
     @pyqtSlot(str)
@@ -167,7 +169,9 @@ class Professor_Window(QMainWindow, form_main):
             msg = msg.replace('@chat ', '', 1)
             self.chat_bro.append(msg)
 
-
+    def closeEvent(self, event):
+        self.t1.send("@exit")
+        event.accept()
 
     def connect_chat(self):
         self.chat_bro.clear()
