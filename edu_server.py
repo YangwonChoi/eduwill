@@ -9,6 +9,7 @@ BUF_SIZE = 1024
 lock = threading.Lock()
 clnt_imfor = []  # [sock, id, type, state]
 clnt_cnt = 0
+room_num = 2
 
 
 def get_DBcursor():
@@ -217,63 +218,104 @@ def get_chat(clnt_num):
     
     while True:
         msg = recv_clnt_msg(clnt_imfor[clnt_num][0])
-        if msg == 'quit':
+        if msg == '@chat exit':
             clnt_imfor[clnt_num][3] = 1
             break
         else:
+            msg = msg.replace('@chat ', ('@chat %s ' %clnt_name))
             for i in range(0, clnt_cnt):
                 if clnt_imfor[clnt_num][3] == clnt_imfor[i][3]:
-                    send_clnt_msg(clnt_imfor[i][0], (clnt_name + msg))
+                    send_clnt_msg(clnt_imfor[i][0], msg)
+                    break
     con.close()
     return
 
 
-def set_chat_state(clnt_num):           #수정 필요
+def set_chat_state(clnt_num, name):           #수정 필요
+    global room_num
     con, c = get_DBcursor()
+    name = name.replace('chat/', '')
     if clnt_imfor[clnt_num][2] == 'stu':  # 학생이 채팅요청 했을 경우
-        c.execute('SELECT Teacher FROM studentTBL WHERE ID=?',
-                  (clnt_imfor[clnt_num][1]))  # 해당 학생의 담당선생님 id 추출
-        teacher = c.fetchone()
-        teacher = ''.join(teacher)
-        teacher.split('|')
+        c.execute('SELECT ID FROM teacherTBL WHERE Name=?', (name, ))
+        tea_id = c.fetchone()
+        if not tea_id:
+            print('name error')
+            con.close()
+            return
+        tea_id = ''.join(tea_id)
         lock.acquire()
-        for i in range(0, len(clnt_imfor)):  # 선생 id 접속중이면 채팅요청 보냄
-            if teacher[0] == clnt_imfor[i][1]:
-                if clnt_imfor[i][3] == 1:
-                    send_clnt_msg(
-                        clnt_imfor[i][0], ('@plz_chat/%s' % clnt_imfor[clnt_num][1]))
-                    clnt_imfor[i][3] = 2
-                    clnt_imfor[clnt_num][3] = 2
-                    get_chat(clnt_num)
+        for i in range(0, clnt_cnt):
+            if clnt_imfor[i][2] == 'tea' and clnt_imfor[i][1] == tea_id and clnt_imfor[i][3] == 1:
+                send_clnt_msg(clnt_imfor[i][0], 'invite')
+                msg = recv_clnt_msg(clnt_imfor[i][0])
+                if msg == 'OK':
+                    clnt_imfor[clnt_num][3] = room_num
+                    clnt_imfor[i][3] = room_num
+                    room_num = room_num + 1
+                    lock.release()
+                    get_chat(clnt_num, room_num)
                     con.close()
                     return
-                else:  # 해당 선생 채팅중이면 채팅중 send
-                    send_clnt_msg(clnt_imfor[clnt_num][0], 'teacher_chatting')
+                elif msg == 'NO':
+                    send_clnt_msg(clnt_imfor[clnt_num][0], 'NO')
                     con.close()
                     return
-        lock.release()
-        # 해당 선생 접속중 아니면 offline send
-        send_clnt_msg(clnt_imfor[clnt_num, 'offline_teacher'])
+    elif clnt_imfor[clnt_num][2] == 'tea':
+        c.execute('SELECT ID FROM studentTBL WHERE Name=?', (name, ))
+        stu_id = c.fetchone()
+        if not tea_id:
+            print('name error')
+            con.close()
+            return
+        stu_id = ''.join(stu_id)
+        lock.acquire()
+        for i in range(0, clnt_cnt):
+            if clnt_imfor[i][2] == 'tea' and clnt_imfor[i][1] == stu_id and clnt_imfor[i][3] == 1:
+                send_clnt_msg(clnt_imfor[i][0], 'invite')
+                msg = recv_clnt_msg(clnt_imfor[i][0])
+                if msg == 'OK':
+                    clnt_imfor[clnt_num][3] = room_num
+                    clnt_imfor[i][3] = room_num
+                    room_num = room_num + 1
+                    lock.release()
+                    get_chat(clnt_num, room_num)
+                    con.close()
+                    return
+                elif msg == 'NO':
+                    send_clnt_msg(clnt_imfor[clnt_num][0], 'NO')
+                    con.close()
+                    return
+    else:
+        print('type error in set_chat_state')
         con.close()
         return
-    return
 
-
-
-def send_stu_list(clnt_num):
+def send_list(clnt_num):
     con, c = get_DBcursor()
     name_list = []
-    for i in range(0, clnt_cnt):
-        if clnt_imfor[i][2] == 'stu' and clnt_imfor[i][3] == 1:
-            c.execute('SELECT Name FROM studentTBL WHERE ID=?', (clnt_imfor[i][1], ))
-            print(clnt_imfor[i][1])
-            name_data = c.fetchone()
-            print(name_data)
-            name_data = ''.join(name_data)
-            name_list.append(name_data)
-            print(name_data)
-    send_data = '/'.join(name_list)
-    send_clnt_msg(clnt_imfor[clnt_num][0], ('@member ' + send_data))
+    if clnt_imfor[clnt_num][2] == 'tea': 
+        for i in range(0, clnt_cnt):
+            if clnt_imfor[i][2] == 'stu' and clnt_imfor[i][3] == 1:
+                c.execute('SELECT Name FROM studentTBL WHERE ID=?', (clnt_imfor[i][1], ))
+                name_data = c.fetchone()
+                name_data = ''.join(name_data)
+                name_list.append(name_data)
+    elif clnt_imfor[clnt_num][2] == 'stu':
+        for i in range(0, clnt_cnt):
+            if clnt_imfor[i][2] == 'tea' and clnt_imfor[i][3] == 1:
+                c.execute('SELECT Name FROM teacherTBL WHERE ID=?', (clnt_imfor[i][1], ))
+                name_data = c.fetchone()
+                name_data = ''.join(name_data)
+                name_list.append(name_data)
+    else:
+        print('type error in send_list')
+        con.close()
+        return
+    if len(name_list) == 0:
+        send_clnt_msg(clnt_imfor[clnt_num][0], '@member empty')
+    else:
+        send_data = '/'.join(name_list)
+        send_clnt_msg(clnt_imfor[clnt_num][0], ('@member ' + send_data))
     con.close()
     return
 
@@ -290,7 +332,7 @@ def call_func(clnt_num, instruction):
     elif instruction == 'chat':
         set_chat_state(clnt_num, instruction)
     elif instruction == 'member':
-        send_stu_list(clnt_num)
+        send_list(clnt_num)
     else:
         return
 
