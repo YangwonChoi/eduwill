@@ -219,6 +219,9 @@ def get_chat(clnt_num):
     while True:
         msg = recv_clnt_msg(clnt_imfor[clnt_num][0])
         if msg == '@chat exit':
+            for i in range(0, clnt_cnt):
+                if clnt_imfor[clnt_num][3] == clnt_imfor[i][3]:
+                    send_clnt_msg(clnt_imfor[i][0], ('@chat %s님이 채팅방을 나갔습니다.' %clnt_name))
             clnt_imfor[clnt_num][3] = 1
             break
         else:
@@ -246,9 +249,9 @@ def set_chat_state(clnt_num, name):           #수정 필요
         lock.acquire()
         for i in range(0, clnt_cnt):
             if clnt_imfor[i][2] == 'tea' and clnt_imfor[i][1] == tea_id and clnt_imfor[i][3] == 1:
-                send_clnt_msg(clnt_imfor[i][0], 'invite')
+                send_clnt_msg(clnt_imfor[i][0], '@chat invite')
                 msg = recv_clnt_msg(clnt_imfor[i][0])
-                if msg == 'OK':
+                if msg == '@chat OK':
                     clnt_imfor[clnt_num][3] = room_num
                     clnt_imfor[i][3] = room_num
                     room_num = room_num + 1
@@ -256,14 +259,14 @@ def set_chat_state(clnt_num, name):           #수정 필요
                     get_chat(clnt_num, room_num)
                     con.close()
                     return
-                elif msg == 'NO':
-                    send_clnt_msg(clnt_imfor[clnt_num][0], 'NO')
+                elif msg == '@chat NO':
+                    send_clnt_msg(clnt_imfor[clnt_num][0], '@chat NO')
                     con.close()
                     return
     elif clnt_imfor[clnt_num][2] == 'tea':
         c.execute('SELECT ID FROM studentTBL WHERE Name=?', (name, ))
         stu_id = c.fetchone()
-        if not tea_id:
+        if not stu_id:
             print('name error')
             con.close()
             return
@@ -271,9 +274,9 @@ def set_chat_state(clnt_num, name):           #수정 필요
         lock.acquire()
         for i in range(0, clnt_cnt):
             if clnt_imfor[i][2] == 'tea' and clnt_imfor[i][1] == stu_id and clnt_imfor[i][3] == 1:
-                send_clnt_msg(clnt_imfor[i][0], 'invite')
+                send_clnt_msg(clnt_imfor[i][0], '@chat invite')
                 msg = recv_clnt_msg(clnt_imfor[i][0])
-                if msg == 'OK':
+                if msg == '@chat OK':
                     clnt_imfor[clnt_num][3] = room_num
                     clnt_imfor[i][3] = room_num
                     room_num = room_num + 1
@@ -281,8 +284,8 @@ def set_chat_state(clnt_num, name):           #수정 필요
                     get_chat(clnt_num, room_num)
                     con.close()
                     return
-                elif msg == 'NO':
-                    send_clnt_msg(clnt_imfor[clnt_num][0], 'NO')
+                elif msg == '@chat NO':
+                    send_clnt_msg(clnt_imfor[clnt_num][0], '@chat NO')
                     con.close()
                     return
     else:
