@@ -188,10 +188,14 @@ class Professor_Window(QMainWindow, form_main):
                 self.listWidget_2.addItem(i)
         elif msg.startswith('@invite'):
             if msg == "@invite":
-                buttonReply = QMessageBox.information(self, '상담요청', "상담할래?", QMessageBox.Yes | QMessageBox.No,QMessageBox.No)
+                buttonReply = QMessageBox.information(self, '상담요청', "상담할래?", QMessageBox.Yes | QMessageBox.No)
 
                 if buttonReply == QMessageBox.Yes:
+                    self.t1.send('@invite OK')
+                    self.chat_bro_2.clear()
                     self.chat_widget.show()
+                else:
+                    self.t1.send('@invite NO')
 
 
     def closeEvent(self, event):
