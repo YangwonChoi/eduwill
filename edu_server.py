@@ -188,6 +188,7 @@ def QnA_ctrl_func(clnt_num):  # Q&A 관련 함수 작성중
 
 def set_questions(clnt_num, question):  # 문제출제 함수
     question = question.split('/')
+    print(question)
     question.remove('set_q')
     con, c = get_DBcursor()
     if clnt_imfor[clnt_num][2] != 'tea':  # 선생 아니면 문제출제 불가 예외처리
@@ -195,16 +196,19 @@ def set_questions(clnt_num, question):  # 문제출제 함수
         con.close()
         return
     else:  # 과목/문제/정답 삽입
-        c.execute('SELECT * FROM QuizTBL WHERE Subject=?', (question[1]))
+        c.execute('SELECT * FROM QuizTBL WHERE Subject=?', (question[1], ))
         rows = c.fetchall()
-        rows = list(rows)
-        for row in rows:
-            row = list(row)
-            row[0] = str(row[0])
-            row[4] = str(row[4])
-            row[5] = str(row[5])
-            row = '/'.join(row)
-            send_clnt_msg(clnt_imfor[clnt_num][0], ('@set_q ' + row))
+        if not rows:
+            send_clnt_msg(clnt_imfor[clnt_num][0], '@set_q empty')
+        else:
+            rows = list(rows)
+            for row in rows:
+                row = list(row)
+                row[0] = str(row[0])
+                row[4] = str(row[4])
+                row[5] = str(row[5])
+                row = '/'.join(row)
+                send_clnt_msg(clnt_imfor[clnt_num][0], ('@set_q ' + row))
         send_clnt_msg(clnt_imfor[clnt_num][0], '@set_q done')
         # lock.acquire
         # c.executemany(
@@ -284,7 +288,7 @@ def set_chat_state(clnt_num, name):           #수정 필요
             return
         stu_id = ''.join(stu_id)
         for i in range(0, clnt_cnt):
-            if clnt_imfor[i][2] == 'tea' and clnt_imfor[i][1] == stu_id and clnt_imfor[i][3] == 1:
+            if clnt_imfor[i][2] == 'stu' and clnt_imfor[i][1] == stu_id and clnt_imfor[i][3] == 1:
                 send_clnt_msg(clnt_imfor[i][0], '@invite')
                 msg = recv_clnt_msg(clnt_imfor[i][0])
                 if msg == '@invite OK':
