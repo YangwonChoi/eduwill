@@ -221,12 +221,13 @@ def set_questions(clnt_num, question):  # 문제출제 함수
 
 
 def get_chat(clnt_num):
+    print(clnt_imfor[clnt_num][1])
     con, c = get_DBcursor()
     type = clnt_imfor[clnt_num][2]
     if type == 'stu':  # 학생/선생 table 열어서 id 가져옴
-        c.execute("SELECT Name FROM studentTBL WHERE ID=?", (clnt_imfor[clnt_num][1]))
+        c.execute("SELECT Name FROM studentTBL WHERE ID=?", (clnt_imfor[clnt_num][1],))
     elif type == 'tea':
-        c.execute("SELECT Name FROM teacherTBL WHERE ID=?", (clnt_imfor[clnt_num][1]))
+        c.execute("SELECT Name FROM teacherTBL WHERE ID=?", (clnt_imfor[clnt_num][1],))
     else:
         print('type error in get_chat')
         return
@@ -245,8 +246,9 @@ def get_chat(clnt_num):
             msg = msg.replace('@chat ', ('@chat [%s] ' %clnt_name))
             for i in range(0, clnt_cnt):
                 if clnt_imfor[clnt_num][3] == clnt_imfor[i][3]:
+                    print(clnt_imfor[i][1])
+                    print(msg)
                     send_clnt_msg(clnt_imfor[i][0], msg)
-                    break
     con.close()
     return
 
@@ -272,7 +274,7 @@ def set_chat_state(clnt_num, name):           #수정 필요
                     clnt_imfor[clnt_num][3] = room_num
                     clnt_imfor[i][3] = room_num
                     room_num = room_num + 1
-                    get_chat(clnt_num, room_num)
+                    get_chat(clnt_num)
                     con.close()
                     return
                 elif msg == '@chat NO':
@@ -295,7 +297,7 @@ def set_chat_state(clnt_num, name):           #수정 필요
                     clnt_imfor[clnt_num][3] = room_num
                     clnt_imfor[i][3] = room_num
                     room_num = room_num + 1
-                    get_chat(clnt_num, room_num)
+                    get_chat(clnt_num)
                     con.close()
                     return
                 elif msg == '@chat NO':
@@ -351,6 +353,8 @@ def call_func(clnt_num, instruction):
         set_chat_state(clnt_num, instruction)
     elif instruction == 'member':
         send_list(clnt_num)
+    elif instruction == 'invite OK':
+        get_chat(clnt_num)
     else:
         return
 

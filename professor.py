@@ -27,8 +27,10 @@ class SocketClient(QThread):
             data = data.decode()
 
 
-            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@set_q'):
+
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@set_q') or data.startswith('@invite'):
                 self.add_user.emit(data)
+                print("시그널메세지",data)
 
 
             else:
@@ -78,6 +80,7 @@ class Professor_Window(QMainWindow, form_main):
         self.char_radiobtn.clicked.connect(lambda :self.radio_check(self.char_radiobtn.text()))
         self.backback_btn.clicked.connect(self.hide)
         self.send_btn.clicked.connect(self.send_serv)
+        self.send_btn_2.clicked.connect(self.send_chat_msg)
 
 
 
@@ -184,6 +187,17 @@ class Professor_Window(QMainWindow, form_main):
             msg = msg.replace('@set_q ', '', 1)
             for i in msg.split("@set_q "):
                 self.listWidget_2.addItem(i)
+        elif msg.startswith('@invite'):
+            if msg == "@invite":
+                buttonReply = QMessageBox.information(self, '상담요청', "상담할래?", QMessageBox.Yes | QMessageBox.No)
+
+                if buttonReply == QMessageBox.Yes:
+                    self.t1.send('@invite OK')
+                    self.chat_bro_2.clear()
+                    self.menu_widget.hide()
+                    self.chat_widget.show()
+                else:
+                    self.t1.send('@invite NO')
 
 
     def closeEvent(self, event):
@@ -195,6 +209,9 @@ class Professor_Window(QMainWindow, form_main):
         self.t1.send(f"@chat/{self.listWidget.currentItem().text()}")
         self.select_widget.hide()
         self.chat_widget.show()
+    def send_chat_msg(self):
+        self.t1.send(f"@chat {self.chat_input_2.text()}")
+        self.chat_input_2.clear()
 
 
     def quiz_time(self):
@@ -205,8 +222,7 @@ class Professor_Window(QMainWindow, form_main):
         for i in self.radio:
             if i.isChecked():
                 table = i.text()
-        self.t1.send(table)
-        self.t1.send("@set_q")
+        self.t1.send(f"@set_q/{self.surv_radiobtn.text()}")
         self.quiz_widget.show()
 
     def send_serv(self):
@@ -242,5 +258,5 @@ class Professor_Window(QMainWindow, form_main):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Professor_Window()
+    win.setWindowTitle('교수')
     sys.exit(app.exec())
-
