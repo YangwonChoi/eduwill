@@ -29,8 +29,7 @@ class SocketClient(QThread):
             data = data.decode()
             print(data)
 
-            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith(
-                    '@member') or data.startswith('@chat') or data.startswith('@set_q') or data.startswith('@invite'):
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@set_q') or data.startswith('@invite'):
                 self.add_user.emit(data)
 
     def send(self, msg):
@@ -62,6 +61,7 @@ class Student_Window(QMainWindow, form_stu):
         self.chat_exit_bt.clicked.connect(self.chat_exit)  # 상담(채팅) 종료버튼 눌렀을때
         self.listWidget_2.itemClicked.connect(lambda: self.conect_btn.setDisabled(False))
         self.t1.add_user.connect(self.add_user)
+        self.send_btn.clicked.connect(self.chat_send)
 
     def initUI(self):
         self.setupUi(self)
@@ -73,6 +73,7 @@ class Student_Window(QMainWindow, form_stu):
         self.sign_pw.setEchoMode(QLineEdit.Password)
         self.sign_pw_2.setEchoMode(QLineEdit.Password)
         self.login_pw.setEchoMode(QLineEdit.Password)
+        
 
     def sign_up(self):  # 로그인 버튼 눌렀을때
         self.t1.send("@sign_up")
@@ -113,21 +114,25 @@ class Student_Window(QMainWindow, form_stu):
     def login(self):  # 로그인 버튼 눌럿을때
         self.t1.send(f"@log_in/{self.login_id.text()}/{self.login_pw.text()}")
 
-    def chating(self):  # 상담버튼 눌렀을때
+    def chating(self): #상담버튼 눌렀을때
         self.menu_widget.hide()
         self.t1.send("@member")
         self.select_widget.show()
         self.conect_btn.setDisabled(True)
 
-    def connect_exit(self):  # 상담리스트 종료버튼 눌렀을때
+    def connect_exit(self): # 상담리스트 종료버튼 눌렀을때
         self.t1.send("@exit")
         self.select_widget.hide()
         self.menu_widget.show()
 
-    def chat_exit(self):  # 상담 종료버튼 눌렀을때
+    def chat_exit(self): # 상담 종료버튼 눌렀을때
         self.t1.send("@exit")
         self.chat_widget.hide()
         self.select_widget.show()
+
+    def chat_send(self):
+        self.t1.send(f"@chat {self.chat_input.text()}")
+        self.chat_input.clear()
 
     @pyqtSlot(str)
     def add_user(self, msg):
@@ -173,22 +178,17 @@ class Student_Window(QMainWindow, form_stu):
                 buttonReply = QMessageBox.information(self, '채팅요청', "상담요청이 왔습니다.", QMessageBox.Yes | QMessageBox.No)
                 if buttonReply == QMessageBox.Yes:
                     self.t1.send('@invite OK')
-                    self.chat_bro.clear()
-                    self.menu_widget.hide()
                     self.chat_widget.show()
-                else:
-                    self.t1.send('@invite NO')
 
-
-    def connect_chat(self):  # 상담 연결하기 버튼 눌렀을때
+    def connect_chat(self): # 상담 연결하기 버튼 눌렀을때
         self.chat_bro.clear()
         self.select_widget.hide()
         self.chat_widget.show()
         self.t1.send(f"@chat/{self.listWidget_2.currentItem().text()}")
+        print(self.listWidget_2.currentItem().text())
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Student_Window()
-    win.setWindowTitle('학생')
     sys.exit(app.exec())

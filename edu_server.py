@@ -255,7 +255,11 @@ def get_chat(clnt_num):
 
 def set_chat_state(clnt_num, name):           #수정 필요
     global room_num
+    if clnt_imfor[clnt_num][3] != 1:
+        get_chat(clnt_num)
     con, c = get_DBcursor()
+    print(name)
+    print(clnt_imfor[clnt_num])
     name = name.replace('chat/', '')
     send_clnt_msg(clnt_imfor[clnt_num][0], '@chat 서버메세지 : 연결중입니다.')
     if clnt_imfor[clnt_num][2] == 'stu':  # 학생이 채팅요청 했을 경우
@@ -374,7 +378,7 @@ def handle_clnt(clnt_sock):
             delete_imfor(clnt_sock)
             lock.release()
             break
-        
+
         print(clnt_msg)
         if clnt_msg.startswith('@'):            # 특정 기능 실행 시 @ 붙여서 받음
             clnt_msg = clnt_msg.replace('@', '')
