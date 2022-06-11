@@ -194,6 +194,7 @@ class Professor_Window(QMainWindow, form_main):
                 if buttonReply == QMessageBox.Yes:
                     self.t1.send('@invite OK')
                     self.chat_bro_2.clear()
+                    self.menu_widget.hide()
                     self.chat_widget.show()
                 else:
                     self.t1.send('@invite NO')
@@ -257,4 +258,5 @@ class Professor_Window(QMainWindow, form_main):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Professor_Window()
+    win.setWindowTitle('교수')
     sys.exit(app.exec())
