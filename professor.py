@@ -80,6 +80,7 @@ class Professor_Window(QMainWindow, form_main):
         self.char_radiobtn.clicked.connect(lambda :self.radio_check(self.char_radiobtn.text()))
         self.backback_btn.clicked.connect(self.hide)
         self.send_btn.clicked.connect(self.send_serv)
+        self.send_btn_2.clicked.connect(self.send_chat_msg)
 
 
 
@@ -207,6 +208,9 @@ class Professor_Window(QMainWindow, form_main):
         self.t1.send(f"@chat/{self.listWidget.currentItem().text()}")
         self.select_widget.hide()
         self.chat_widget.show()
+    def send_chat_msg(self):
+        self.t1.send(f"@chat {self.chat_input_2.text()}")
+        self.chat_input_2.clear()
 
 
     def quiz_time(self):
