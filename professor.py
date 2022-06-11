@@ -25,10 +25,12 @@ class SocketClient(QThread):
         while True:
             data = self.cnn.recv(1024)
             data = data.decode()
-            print(data)
 
-            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat'):
+
+
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@set_q') or data.startswith('@invite'):
                 self.add_user.emit(data)
+                print("시그널메세지",data)
 
 
             else:
@@ -51,6 +53,8 @@ class Professor_Window(QMainWindow, form_main):
         self.menu_widget.hide()
         self.select_widget.hide()
         self.chat_widget.hide()
+        self.quiz_widget.hide()
+        self.make_widget.hide()
 
         self.t1.start()
 
@@ -68,6 +72,16 @@ class Professor_Window(QMainWindow, form_main):
         self.conect_btn.clicked.connect(self.connect_chat)
         self.listWidget.itemClicked.connect(lambda: self.conect_btn.setDisabled(False))
         self.chat_exit_bt.clicked.connect(self.connect_exit)
+        self.quiz_btn.clicked.connect(self.quiz_time)
+        self.back_btn_2.clicked.connect(self.quiz_back)
+        self.sub_btn.clicked.connect(self.send_quiz)
+        self.surv_radiobtn.clicked.connect(lambda :self.radio_check(self.surv_radiobtn.text()))
+        self.land_radiobtn.clicked.connect(lambda :self.radio_check(self.land_radiobtn.text()))
+        self.char_radiobtn.clicked.connect(lambda :self.radio_check(self.char_radiobtn.text()))
+        self.backback_btn.clicked.connect(self.hide)
+        self.send_btn.clicked.connect(self.send_serv)
+
+
 
     def initUI(self):
         self.setupUi(self)
@@ -167,20 +181,68 @@ class Professor_Window(QMainWindow, form_main):
                 self.listWidget.addItem(f'{i}')
         elif msg.startswith('@chat'):
             msg = msg.replace('@chat ', '', 1)
-            self.chat_bro.append(msg)
+            self.chat_bro_2.append(msg)
+        elif msg.startswith('@set_q'):
+            msg = msg.replace('@set_q ', '', 1)
+            for i in msg.split("@set_q "):
+                self.listWidget_2.addItem(i)
+        elif msg.startswith('@invite'):
+            if msg == "@invite":
+                buttonReply = QMessageBox.information(self, '상담요청', "상담할래?", QMessageBox.Yes | QMessageBox.No,QMessageBox.No)
+
+                if buttonReply == QMessageBox.Yes:
+                    self.chat_widget.show()
+
 
     def closeEvent(self, event):
         self.t1.send("@exit")
         event.accept()
 
     def connect_chat(self):
-        self.chat_bro.clear()
+        self.chat_bro_2.clear()
         self.t1.send(f"@chat/{self.listWidget.currentItem().text()}")
         self.select_widget.hide()
         self.chat_widget.show()
 
 
+    def quiz_time(self):
+        self.menu_widget.hide()
+        self.listWidget_2.clear()
 
+        self.radio = [self.surv_radiobtn, self.land_radiobtn, self.char_radiobtn]
+        for i in self.radio:
+            if i.isChecked():
+                table = i.text()
+        self.t1.send(f"@set_q/{self.surv_radiobtn.text()}")
+        self.quiz_widget.show()
+
+    def send_serv(self):
+        for i in self.radio:
+            if i.isChecked():
+                table = i.text()
+        quiz = self.lineEdit.text()
+        answer = self.lineEdit_2.text()
+        self.t1.send(f'')
+
+    def radio_check(self, a):
+        self.listWidget_2.clear()
+        self.t1.send(a)
+
+
+
+
+
+
+    def send_quiz(self):
+        self.make_widget.show()
+
+
+    def quiz_back(self):
+        self.quiz_widget.hide()
+        self.menu_widget.show()
+
+    def hide(self):
+        self.make_widget.hide()
 
 
 
@@ -188,4 +250,3 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Professor_Window()
     sys.exit(app.exec())
-
