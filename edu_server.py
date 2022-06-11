@@ -41,6 +41,7 @@ def delete_imfor(clnt_sock):
                 i += 1
             break
     clnt_cnt -= 1
+    clnt_sock.close()
 
 
 def sign_up(clnt_num):
@@ -130,24 +131,24 @@ def log_in(clnt_num, log_in_data):
     return
 
 
-def QA_ctrl_func(clnt_num):  # Q&A 관련 함수 작성중
+def QnA_ctrl_func(clnt_num):  # Q&A 관련 함수 작성중
     con, c = get_DBcursor()
     type = clnt_imfor[clnt_num][2]
     if type == 'stu':
         c.execute('SELECT * FROM Q&ATBL WHERE ID=?', (clnt_imfor[clnt_num][1],))
         rows = c.fetchall()
         if not c:  #등록된 질문 없을 시 X send
-            send_clnt_msg(clnt_imfor[clnt_num][0], 'X')
+            send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA empty')
         else:  #질문 등록돼있으면 리스트 다 보내줌
             for row in rows:
                 row = list(row)
                 row[0] = str(row[0])
                 row = '/'.join(row)
-                send_clnt_msg(clnt_imfor[clnt_num][0], row)
-            send_clnt_msg(clnt_imfor[clnt_num][0], 'done')
+                send_clnt_msg(clnt_imfor[clnt_num][0], ('@QnA ' + row))
+            send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA done')
         while True:  #클라이언트에서 quit 보내기 전 까지 계속 질문 받음
             msg = recv_clnt_msg(clnt_imfor[clnt_num][0])
-            if msg == 'quit':
+            if msg == '@exit':
                 con.close()
                 return
             else:
@@ -159,7 +160,7 @@ def QA_ctrl_func(clnt_num):  # Q&A 관련 함수 작성중
         c.execute('SELECT * FROM Q&ATBL')
         rows = c.fetchall()
         if not c:  #등록된 질문 없을 시 X send
-            send_clnt_msg(clnt_imfor[clnt_num][0], 'X')
+            send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA empty')
             con.close()
             return
         else:
@@ -167,11 +168,11 @@ def QA_ctrl_func(clnt_num):  # Q&A 관련 함수 작성중
                 row = list(row)
                 row[0] = str(row[0])
                 row = '/'.join(row)
-                send_clnt_msg(clnt_imfor[clnt_num][0], row)
-            send_clnt_msg(clnt_imfor[clnt_num][0], 'done')
+                send_clnt_msg(clnt_imfor[clnt_num][0], ('@QnA ' + row))
+            send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA done')
         while True:
             msg = recv_clnt_msg(clnt_imfor[clnt_num][0])
-            if msg == 'quit':
+            if msg == '@exit':
                 con.close()
                 break
             else:
@@ -187,6 +188,7 @@ def QA_ctrl_func(clnt_num):  # Q&A 관련 함수 작성중
 
 def set_questions(clnt_num, question):  # 문제출제 함수
     question = question.split('/')
+    print(question)
     question.remove('set_q')
     con, c = get_DBcursor()
     if clnt_imfor[clnt_num][2] != 'tea':  # 선생 아니면 문제출제 불가 예외처리
@@ -194,12 +196,27 @@ def set_questions(clnt_num, question):  # 문제출제 함수
         con.close()
         return
     else:  # 과목/문제/정답 삽입
-        lock.acquire
-        c.executemany(
-            "INSERT INTO quizTBL(Subject, Quiz, Answer) VALUES(?, ?, ?)", (question,))
-        con.commit()
-        con.close()
-        lock.release()
+        c.execute('SELECT * FROM QuizTBL WHERE Subject=?', (question[1], ))
+        rows = c.fetchall()
+        if not rows:
+            send_clnt_msg(clnt_imfor[clnt_num][0], '@set_q empty')
+        else:
+            rows = list(rows)
+            for row in rows:
+                row = list(row)
+                row[0] = str(row[0])
+                row[4] = str(row[4])
+                row[5] = str(row[5])
+                row = '/'.join(row)
+                send_clnt_msg(clnt_imfor[clnt_num][0], ('@set_q ' + row))
+        send_clnt_msg(clnt_imfor[clnt_num][0], '@set_q done')
+        # lock.acquire
+        # c.executemany(
+        #     "INSERT INTO quizTBL(Subject, Quiz, Answer) VALUES(?, ?, ?)", (question,))
+        # con.commit()
+        # con.close()
+        # lock.release()
+    con.close()
     return
 
 
@@ -247,21 +264,19 @@ def set_chat_state(clnt_num, name):           #수정 필요
             con.close()
             return
         tea_id = ''.join(tea_id)
-        lock.acquire()
         for i in range(0, clnt_cnt):
             if clnt_imfor[i][2] == 'tea' and clnt_imfor[i][1] == tea_id and clnt_imfor[i][3] == 1:
-                send_clnt_msg(clnt_imfor[i][0], '@chat invite')
+                send_clnt_msg(clnt_imfor[i][0], '@invite')
                 msg = recv_clnt_msg(clnt_imfor[i][0])
-                if msg == '@chat OK':
+                if msg == '@invite OK':
                     clnt_imfor[clnt_num][3] = room_num
                     clnt_imfor[i][3] = room_num
                     room_num = room_num + 1
-                    lock.release()
                     get_chat(clnt_num, room_num)
                     con.close()
                     return
                 elif msg == '@chat NO':
-                    send_clnt_msg(clnt_imfor[clnt_num][0], '@chat NO')
+                    send_clnt_msg(clnt_imfor[clnt_num][0], '@invite NO')
                     con.close()
                     return
     elif clnt_imfor[clnt_num][2] == 'tea':
@@ -272,27 +287,26 @@ def set_chat_state(clnt_num, name):           #수정 필요
             con.close()
             return
         stu_id = ''.join(stu_id)
-        lock.acquire()
         for i in range(0, clnt_cnt):
-            if clnt_imfor[i][2] == 'tea' and clnt_imfor[i][1] == stu_id and clnt_imfor[i][3] == 1:
-                send_clnt_msg(clnt_imfor[i][0], '@chat invite')
+            if clnt_imfor[i][2] == 'stu' and clnt_imfor[i][1] == stu_id and clnt_imfor[i][3] == 1:
+                send_clnt_msg(clnt_imfor[i][0], '@invite')
                 msg = recv_clnt_msg(clnt_imfor[i][0])
-                if msg == '@chat OK':
+                if msg == '@invite OK':
                     clnt_imfor[clnt_num][3] = room_num
                     clnt_imfor[i][3] = room_num
                     room_num = room_num + 1
-                    lock.release()
                     get_chat(clnt_num, room_num)
                     con.close()
                     return
                 elif msg == '@chat NO':
-                    send_clnt_msg(clnt_imfor[clnt_num][0], '@chat NO')
+                    send_clnt_msg(clnt_imfor[clnt_num][0], '@invite NO')
                     con.close()
                     return
     else:
         print('type error in set_chat_state')
         con.close()
         return
+
 
 def send_list(clnt_num):
     con, c = get_DBcursor()
@@ -331,9 +345,9 @@ def call_func(clnt_num, instruction):
         log_in(clnt_num, instruction)
     elif instruction.startswith('set_q'):
         set_questions(clnt_num, instruction)
-    elif instruction.startswith('Q&A'):
-        QA_ctrl_func(clnt_num)
-    elif instruction == 'chat':
+    elif instruction == 'QnA':
+        QnA_ctrl_func(clnt_num)
+    elif instruction.startswith('chat'):
         set_chat_state(clnt_num, instruction)
     elif instruction == 'member':
         send_list(clnt_num)

@@ -29,7 +29,7 @@ class SocketClient(QThread):
             data = data.decode()
             print(data)
 
-            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member'):
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@set_q') or data.startswith('@invite'):
                 self.add_user.emit(data)
 
     def send(self, msg):
@@ -58,7 +58,7 @@ class Student_Window(QMainWindow, form_stu):
         self.chat_btn.clicked.connect(self.chating)  # 상담리스트 버튼 눌렀을때
         self.conect_btn.clicked.connect(self.connect_chat)  # 상담리스트 연결하기 버튼 눌렀을때
         self.exit_st.clicked.connect(self.connect_exit)  # 상담리스트 종료버튼 눌렀을때
-        self.chat_exit_bt.clicked.connect(self.chat_exit)#상담(채팅) 종료버튼 눌렀을때
+        self.chat_exit_bt.clicked.connect(self.chat_exit)  # 상담(채팅) 종료버튼 눌렀을때
         self.listWidget_2.itemClicked.connect(lambda: self.conect_btn.setDisabled(False))
         self.t1.add_user.connect(self.add_user)
 
@@ -73,7 +73,7 @@ class Student_Window(QMainWindow, form_stu):
         self.sign_pw_2.setEchoMode(QLineEdit.Password)
         self.login_pw.setEchoMode(QLineEdit.Password)
 
-    def sign_up(self): #로그인 버튼 눌렀을때
+    def sign_up(self):  # 로그인 버튼 눌렀을때
         self.t1.send("@sign_up")
         self.sign_widget.show()
 
@@ -102,8 +102,7 @@ class Student_Window(QMainWindow, form_stu):
         if not sign_check:
             QMessageBox.about(self, '경고', '잘못된 양식 입니다')
         else:
-            self.t1.send(
-                f"{self.sign_id.text()}/{self.sign_pw.text()}/{self.name.text()}")
+            self.t1.send(f"{self.sign_id.text()}/{self.sign_pw.text()}/{self.name.text()}")
             self.name.clear()
             self.sign_id.clear()
             self.sign_pw.clear()
@@ -113,18 +112,18 @@ class Student_Window(QMainWindow, form_stu):
     def login(self):  # 로그인 버튼 눌럿을때
         self.t1.send(f"@log_in/{self.login_id.text()}/{self.login_pw.text()}")
 
-    def chating(self):
+    def chating(self): #상담버튼 눌렀을때
         self.menu_widget.hide()
         self.t1.send("@member")
         self.select_widget.show()
         self.conect_btn.setDisabled(True)
-        
-    def connect_exit(self):
+
+    def connect_exit(self): # 상담리스트 종료버튼 눌렀을때
         self.t1.send("@exit")
         self.select_widget.hide()
         self.menu_widget.show()
 
-    def chat_exit(self):
+    def chat_exit(self): # 상담 종료버튼 눌렀을때
         self.t1.send("@exit")
         self.chat_widget.hide()
         self.select_widget.show()
@@ -167,20 +166,18 @@ class Student_Window(QMainWindow, form_stu):
                 print(i)
         elif msg.startswith('@chat'):
             msg = msg.replace('@chat ', '', 1)
-            self.chats.append(msg)
+            self.chat_bro.append(msg)
         elif msg.startswith('@invite'):
             if msg == '@invite':
-                buttonReply = QMessageBox.information(
-                    self, '채팅요청', "상담요청이왔습니다.", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                buttonReply = QMessageBox.information(self, '채팅요청', "상담요청이 왔습니다.", QMessageBox.Yes | QMessageBox.No)
                 if buttonReply == QMessageBox.Yes:
-                    print('Yes clicked.')
+                    self.chat_widget.show()
 
-
-    def connect_chat(self):
+    def connect_chat(self): # 상담 연결하기 버튼 눌렀을때
         self.chat_bro.clear()
         self.select_widget.hide()
         self.chat_widget.show()
-        self.t1.send(f"@chat {self.listWidget.currentItem().text()}")
+        self.t1.send(f"@chat/{self.listWidget_2.currentItem().text()}")
 
 
 if __name__ == "__main__":
