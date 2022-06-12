@@ -1202,10 +1202,26 @@ border-radius: 15px}
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="QListWidget" name="listWidget_2">
+       <widget class="QTableWidget" name="listWidget_2">
         <property name="styleSheet">
          <string notr="true">background-color: rgb(238, 238, 236);</string>
         </property>
+        <property name="dragDropOverwriteMode">
+         <bool>true</bool>
+        </property>
+        <property name="alternatingRowColors">
+         <bool>true</bool>
+        </property>
+        <column>
+         <property name="text">
+          <string>문제</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>답</string>
+         </property>
+        </column>
        </widget>
       </item>
      </layout>
@@ -1214,8 +1230,8 @@ border-radius: 15px}
    <widget class="QWidget" name="make_widget" native="true">
     <property name="geometry">
      <rect>
-      <x>430</x>
-      <y>30</y>
+      <x>350</x>
+      <y>100</y>
       <width>381</width>
       <height>361</height>
      </rect>

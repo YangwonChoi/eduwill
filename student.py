@@ -8,16 +8,16 @@ from socket import *
 form_stu = uic.loadUiType("student.ui")[0]
 
 
-class SocketClient(QThread):
+class SocketClient(QThread): # Q쓰레드 클래스 선언
     add_chat = QtCore.pyqtSignal(list)  # 나중에 데이터 받을때 슬롯들
     add_user = QtCore.pyqtSignal(str)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None): 
         super().__init__()
         self.main = parent
         self.is_run = False
 
-    def connect_cle(self):
+    def connect_cle(self): #소켓연결
         self.cnn = socket(AF_INET, SOCK_STREAM)
         self.cnn.connect(('localhost', 2090))
         self.is_run = True
@@ -61,6 +61,7 @@ class Student_Window(QMainWindow, form_stu):
         self.chat_exit_bt.clicked.connect(self.chat_exit)  # 상담(채팅) 종료버튼 눌렀을때
         self.listWidget_2.itemClicked.connect(lambda: self.conect_btn.setDisabled(False))
         self.t1.add_user.connect(self.add_user)
+        self.send_btn.clicked.connect(self.chat_send) # 상담 보내기 버튼 눌렀을때
 
     def initUI(self):
         self.setupUi(self)
@@ -72,12 +73,13 @@ class Student_Window(QMainWindow, form_stu):
         self.sign_pw.setEchoMode(QLineEdit.Password)
         self.sign_pw_2.setEchoMode(QLineEdit.Password)
         self.login_pw.setEchoMode(QLineEdit.Password)
+        
 
-    def sign_up(self):  # 로그인 버튼 눌렀을때
+    def sign_up(self):  #회원가입 버튼 눌렀을때
         self.t1.send("@sign_up")
         self.sign_widget.show()
 
-    def sign_up_exit(self):  # 취소버튼 눌럿을떄
+    def sign_up_exit(self):  #회원가입 취소버튼 눌럿을떄
         self.t1.send('@exit')
         self.sign_id.setDisabled(False)
         self.idcheck_btn.setDisabled(False)
@@ -98,7 +100,6 @@ class Student_Window(QMainWindow, form_stu):
             sign_check = False
         if not self.id_check:
             sign_check = False
-
         if not sign_check:
             QMessageBox.about(self, '경고', '잘못된 양식 입니다')
         else:
@@ -128,7 +129,11 @@ class Student_Window(QMainWindow, form_stu):
         self.chat_widget.hide()
         self.select_widget.show()
 
-    @pyqtSlot(str)
+    def chat_send(self): #상담 보내기버튼 눌렀을때
+        self.t1.send(f"@chat {self.chat_input.text()}")
+        self.chat_input.clear()
+
+    @pyqtSlot(str) 
     def add_user(self, msg):
         if msg.startswith('@sign_up'):
             msg = msg.replace('@sign_up ', '', 1)
@@ -171,6 +176,7 @@ class Student_Window(QMainWindow, form_stu):
             if msg == '@invite':
                 buttonReply = QMessageBox.information(self, '채팅요청', "상담요청이 왔습니다.", QMessageBox.Yes | QMessageBox.No)
                 if buttonReply == QMessageBox.Yes:
+                    self.t1.send('@invite OK')
                     self.chat_widget.show()
 
     def connect_chat(self): # 상담 연결하기 버튼 눌렀을때
@@ -178,6 +184,7 @@ class Student_Window(QMainWindow, form_stu):
         self.select_widget.hide()
         self.chat_widget.show()
         self.t1.send(f"@chat/{self.listWidget_2.currentItem().text()}")
+        print(self.listWidget_2.currentItem().text())
 
 
 if __name__ == "__main__":
