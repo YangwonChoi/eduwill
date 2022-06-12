@@ -186,20 +186,20 @@ def QnA_ctrl_func(clnt_num):  # Q&A 관련 함수 작성중
         return
 
 
-def set_questions(clnt_num, question):  # 문제출제 함수
+def send_questions(clnt_num, question):  # 문제출제 함수
     question = question.split('/')
     print(question)
-    question.remove('set_q')
+    question.remove('list_q')
     con, c = get_DBcursor()
     if clnt_imfor[clnt_num][2] != 'tea':  # 선생 아니면 문제출제 불가 예외처리
         print('student cant set questions')
         con.close()
         return
     else:  # 과목/문제/정답 삽입
-        c.execute('SELECT * FROM QuizTBL WHERE Subject=?', (question[1], ))
+        c.execute('SELECT * FROM QuizTBL WHERE Subject=?', (question[0], ))
         rows = c.fetchall()
         if not rows:
-            send_clnt_msg(clnt_imfor[clnt_num][0], '@set_q empty')
+            send_clnt_msg(clnt_imfor[clnt_num][0], '@list_q empty')
         else:
             rows = list(rows)
             for row in rows:
@@ -208,17 +208,28 @@ def set_questions(clnt_num, question):  # 문제출제 함수
                 row[4] = str(row[4])
                 row[5] = str(row[5])
                 row = '/'.join(row)
-                send_clnt_msg(clnt_imfor[clnt_num][0], ('@set_q ' + row))
-        send_clnt_msg(clnt_imfor[clnt_num][0], '@set_q done')
-        # lock.acquire
-        # c.executemany(
-        #     "INSERT INTO quizTBL(Subject, Quiz, Answer) VALUES(?, ?, ?)", (question,))
-        # con.commit()
-        # con.close()
-        # lock.release()
+                send_clnt_msg(clnt_imfor[clnt_num][0], ('@list_q ' + row))
+        send_clnt_msg(clnt_imfor[clnt_num][0], '@list_q done')
     con.close()
     return
 
+def set_question(clnt_num, data):
+    question = question.split('/')
+    print(question)
+    question.remove('send_q')
+    con, c = get_DBcursor()
+    if clnt_imfor[clnt_num][2] != 'tea':  # 선생 아니면 문제출제 불가 예외처리
+        print('student cant set questions')
+        con.close()
+        return
+    else:
+        lock.acquire()
+        c.executemany(
+            "INSERT INTO quizTBL(Subject, Quiz, Answer) VALUES(?, ?, ?)", (data,))
+        con.commit()
+        con.close()
+        lock.release()
+    return
 
 def get_chat(clnt_num):
     print(clnt_imfor[clnt_num][1])
@@ -253,7 +264,7 @@ def get_chat(clnt_num):
     return
 
 
-def set_chat_state(clnt_num, name):           #수정 필요
+def set_chat_state(clnt_num, name):
     global room_num
     if clnt_imfor[clnt_num][3] != 1:
         get_chat(clnt_num)
@@ -349,8 +360,8 @@ def call_func(clnt_num, instruction):
         sign_up(clnt_num)
     elif instruction.startswith('log_in'):
         log_in(clnt_num, instruction)
-    elif instruction.startswith('set_q'):
-        set_questions(clnt_num, instruction)
+    elif instruction.startswith('list_q'):
+        send_questions(clnt_num, instruction)
     elif instruction == 'QnA':
         QnA_ctrl_func(clnt_num)
     elif instruction.startswith('chat'):
