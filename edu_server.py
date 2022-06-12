@@ -12,12 +12,14 @@ clnt_cnt = 0
 room_num = 2
 
 
+#DB 연결, 커서획득 함수
 def get_DBcursor():
     con = sqlite3.connect('edu.db')  # DB open
     c = con.cursor()  # 커서 획득
     return (con, c)
 
 
+#버퍼 비우고 recv 및 decode
 def recv_clnt_msg(clnt_sock):
     sys.stdout.flush()  # 버퍼 비우기
     clnt_msg = clnt_sock.recv(BUF_SIZE)  # 메세지 받아오기
@@ -25,14 +27,17 @@ def recv_clnt_msg(clnt_sock):
     return clnt_msg
 
 
+#버퍼 비우고 encode 후 send
 def send_clnt_msg(clnt_sock, msg):
     sys.stdin.flush()  # 버퍼 비우기
     msg = msg.encode()  # 인코딩
     clnt_sock.send(msg)  # 메세지 보내기
 
 
+#클라이언트 종료시 해당 클라이언트 정보를 clnt_imfor 리스트에서 그 뒤의 정보로 덮어씌움
 def delete_imfor(clnt_sock):
     global clnt_cnt
+    lock.acquire()
     for i in range(0, clnt_cnt):
         if clnt_sock == clnt_imfor[i][0]:  # 해당 소켓 가진 클라이언트 정보 찾기
             print('exit client')
@@ -41,11 +46,12 @@ def delete_imfor(clnt_sock):
                 i += 1
             break
     clnt_cnt -= 1
+    lock.release()
     clnt_sock.close()
 
 
+#회원가입
 def sign_up(clnt_num):
-    print('dd')
     con, c = get_DBcursor()
     clnt_sock = clnt_imfor[clnt_num][0]
     type = clnt_imfor[clnt_num][2]
@@ -79,7 +85,6 @@ def sign_up(clnt_num):
             con.close()
             return
         user_data = user_data.split('/')
-        print(user_data)
         lock.acquire()
         if type == 'stu':  # 학생/선생 맞춰서 table에 데이터 저장
             c.executemany(
@@ -97,6 +102,7 @@ def sign_up(clnt_num):
         return
 
 
+#로그인
 def log_in(clnt_num, log_in_data):
     con, c = get_DBcursor()
     clnt_sock = clnt_imfor[clnt_num][0]
@@ -131,7 +137,8 @@ def log_in(clnt_num, log_in_data):
     return
 
 
-def QnA_ctrl_func(clnt_num):  # Q&A 관련 함수 작성중
+#QnA
+def QnA_ctrl_func(clnt_num):
     con, c = get_DBcursor()
     type = clnt_imfor[clnt_num][2]
     if type == 'stu':
@@ -145,7 +152,7 @@ def QnA_ctrl_func(clnt_num):  # Q&A 관련 함수 작성중
                 row[0] = str(row[0])
                 row = '/'.join(row)
                 send_clnt_msg(clnt_imfor[clnt_num][0], ('@QnA ' + row))
-            send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA done')
+            send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA done')   #모든 질문 다 보내주면 완료됐다고 보내줌
         while True:  #클라이언트에서 quit 보내기 전 까지 계속 질문 받음
             msg = recv_clnt_msg(clnt_imfor[clnt_num][0])
             if msg == '@exit':
@@ -186,36 +193,33 @@ def QnA_ctrl_func(clnt_num):  # Q&A 관련 함수 작성중
         return
 
 
+#문제 리스트 보내는 함수
 def send_questions(clnt_num, question):  # 문제출제 함수
     question = question.split('/')
-    print(question)
     question.remove('list_q')
-    con, c = get_DBcursor()
-    if clnt_imfor[clnt_num][2] != 'tea':  # 선생 아니면 문제출제 불가 예외처리
-        print('student cant set questions')
-        con.close()
-        return
-    else:  # 과목/문제/정답 삽입
-        c.execute('SELECT * FROM QuizTBL WHERE Subject=?', (question[0], ))
-        rows = c.fetchall()
-        if not rows:
-            send_clnt_msg(clnt_imfor[clnt_num][0], '@list_q empty')
-        else:
-            rows = list(rows)
-            for row in rows:
-                row = list(row)
-                row[0] = str(row[0])
-                row[4] = str(row[4])
-                row[5] = str(row[5])
-                row = '/'.join(row)
-                send_clnt_msg(clnt_imfor[clnt_num][0], ('@list_q ' + row))
-        send_clnt_msg(clnt_imfor[clnt_num][0], '@list_q done')
+    con, c = get_DBcursor() 
+
+    c.execute('SELECT * FROM QuizTBL WHERE Subject=?', (question[0], ))
+    rows = c.fetchall()  #db에 있는 특정 과목 리스트 가져옴
+    if not rows:    #없을 시 비어있다고 보내줌
+        send_clnt_msg(clnt_imfor[clnt_num][0], '@list_q empty')
+    else:
+        rows = list(rows)
+        for row in rows:    #문제 데이터 다 보내주기
+            row = list(row)
+            row[0] = str(row[0])
+            row[4] = str(row[4])
+            row[5] = str(row[5])
+            row = '/'.join(row)
+            send_clnt_msg(clnt_imfor[clnt_num][0], ('@list_q ' + row))
+    send_clnt_msg(clnt_imfor[clnt_num][0], '@list_q done')  #다 보내면 done 송신
     con.close()
     return
 
+
+#DB에 문제등록
 def set_question(clnt_num, data):
     data = data.split('/')
-    print(data)
     data.remove('set_q')
     con, c = get_DBcursor()
     if clnt_imfor[clnt_num][2] != 'tea':  # 선생 아니면 문제출제 불가 예외처리
@@ -223,9 +227,7 @@ def set_question(clnt_num, data):
         con.close()
         return
     else:
-        print('dd')
         lock.acquire()
-        print(data)
         c.executemany(
             "INSERT INTO quizTBL(Subject, Quiz, Answer) VALUES(?, ?, ?)", (data,))
         con.commit()
@@ -233,8 +235,9 @@ def set_question(clnt_num, data):
         lock.release()
     return
 
+
+#채팅 주고받기
 def get_chat(clnt_num):
-    print(clnt_imfor[clnt_num][1])
     con, c = get_DBcursor()
     type = clnt_imfor[clnt_num][2]
     if type == 'stu':  # 학생/선생 table 열어서 id 가져옴
@@ -248,46 +251,43 @@ def get_chat(clnt_num):
     clnt_name = ''.join(clnt_name)
     
     while True:
-        msg = recv_clnt_msg(clnt_imfor[clnt_num][0])
-        if msg == '@exit':
+        msg = recv_clnt_msg(clnt_imfor[clnt_num][0])    #채팅중인 클라이언트들 메세지 수신
+        if msg == '@exit':  #exit 수신시 나갔다고 상대방에게 보내주고 채팅모드 off
             for i in range(0, clnt_cnt):
                 if clnt_imfor[clnt_num][3] == clnt_imfor[i][3]:
                     send_clnt_msg(clnt_imfor[i][0], ('@chat [%s]님이 채팅방을 나갔습니다.' %clnt_name))
             clnt_imfor[clnt_num][3] = 1
             break
-        else:
+        else:   #송신한 클라이언트와 상대방에게 메세지 보내기
             msg = msg.replace('@chat ', ('@chat [%s] ' %clnt_name))
             for i in range(0, clnt_cnt):
                 if clnt_imfor[clnt_num][3] == clnt_imfor[i][3]:
-                    print(clnt_imfor[i][1])
-                    print(msg)
                     send_clnt_msg(clnt_imfor[i][0], msg)
     con.close()
     return
 
 
+#채팅 요청 보내고 채팅모드 on
 def set_chat_state(clnt_num, name):
     global room_num
-    if clnt_imfor[clnt_num][3] != 1:
+    if clnt_imfor[clnt_num][3] != 1:    #채팅중일시 예외처리
         get_chat(clnt_num)
     con, c = get_DBcursor()
-    print(name)
-    print(clnt_imfor[clnt_num])
     name = name.replace('chat/', '')
     send_clnt_msg(clnt_imfor[clnt_num][0], '@chat 서버메세지 : 연결중입니다.')
     if clnt_imfor[clnt_num][2] == 'stu':  # 학생이 채팅요청 했을 경우
         c.execute('SELECT ID FROM teacherTBL WHERE Name=?', (name, ))
         tea_id = c.fetchone()
-        if not tea_id:
+        if not tea_id:  #이름 없을 시 에러 표시
             print('name error')
             con.close()
             return
         tea_id = ''.join(tea_id)
-        for i in range(0, clnt_cnt):
+        for i in range(0, clnt_cnt):    #선생님에게 invite 송신
             if clnt_imfor[i][2] == 'tea' and clnt_imfor[i][1] == tea_id and clnt_imfor[i][3] == 1:
                 send_clnt_msg(clnt_imfor[i][0], '@invite')
                 msg = recv_clnt_msg(clnt_imfor[i][0])
-                if msg == '@invite OK':
+                if msg == '@invite OK': #수락했을 경우 채팅모드on
                     clnt_imfor[clnt_num][3] = room_num
                     clnt_imfor[i][3] = room_num
                     room_num = room_num + 1
@@ -327,11 +327,12 @@ def set_chat_state(clnt_num, name):
         return
 
 
+#접속자명단 보내는 함수
 def send_list(clnt_num):
     con, c = get_DBcursor()
     name_list = []
-    if clnt_imfor[clnt_num][2] == 'tea': 
-        for i in range(0, clnt_cnt):
+    if clnt_imfor[clnt_num][2] == 'tea': #리스트 요청한 게 선생님일 경우
+        for i in range(0, clnt_cnt):    #접속중인 학생들 이름 찾아서 name_list에 등록
             if clnt_imfor[i][2] == 'stu' and clnt_imfor[i][3] == 1:
                 c.execute('SELECT Name FROM studentTBL WHERE ID=?', (clnt_imfor[i][1], ))
                 name_data = c.fetchone()
@@ -348,15 +349,16 @@ def send_list(clnt_num):
         print('type error in send_list')
         con.close()
         return
-    if len(name_list) == 0:
+    if len(name_list) == 0: #접속자 없을 경우 없다고 송신
         send_clnt_msg(clnt_imfor[clnt_num][0], '@member empty')
-    else:
+    else:   #있으면 리스트를 문자열로 바꿔서 송신
         send_data = '/'.join(name_list)
         send_clnt_msg(clnt_imfor[clnt_num][0], ('@member ' + send_data))
     con.close()
     return
 
 
+#상황에 맞는 함수 호출해주는 함수
 def call_func(clnt_num, instruction):
     if instruction == 'sign_up':
         sign_up(clnt_num)
@@ -370,14 +372,13 @@ def call_func(clnt_num, instruction):
         set_chat_state(clnt_num, instruction)
     elif instruction == 'member':
         send_list(clnt_num)
-    elif instruction == 'invite OK':
-        get_chat(clnt_num)
     elif instruction.startswith('set_q'):
         set_question(clnt_num, instruction)
     else:
         return
 
 
+#클라이언트에게서 오는 메세지 대기
 def handle_clnt(clnt_sock):
     lock.acquire()
     for i in range(0, clnt_cnt):                # clnt_imfor에 해당 클라이언트가 몇 번째에 있는지 추출
@@ -402,6 +403,7 @@ def handle_clnt(clnt_sock):
             continue
 
 
+#main
 if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -413,10 +415,10 @@ if __name__ == '__main__':
         clnt_msg = recv_clnt_msg(clnt_sock)
 
         lock.acquire()
-        clnt_imfor.insert(clnt_cnt, [clnt_sock, '!log_in', clnt_msg, 0])
+        clnt_imfor.insert(clnt_cnt, [clnt_sock, '!log_in', clnt_msg, 0])    #클라이언트 접속시 clnt_imfor에 정보 저장
         clnt_cnt += 1
         print('connect client, type %s' % clnt_msg)
         lock.release()
 
-        t = threading.Thread(target=handle_clnt, args=(clnt_sock,))
+        t = threading.Thread(target=handle_clnt, args=(clnt_sock,)) #클라이언트별로 스레드 할당
         t.start()
