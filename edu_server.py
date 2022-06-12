@@ -214,16 +214,18 @@ def send_questions(clnt_num, question):  # 문제출제 함수
     return
 
 def set_question(clnt_num, data):
-    question = question.split('/')
-    print(question)
-    question.remove('send_q')
+    data = data.split('/')
+    print(data)
+    data.remove('set_q')
     con, c = get_DBcursor()
     if clnt_imfor[clnt_num][2] != 'tea':  # 선생 아니면 문제출제 불가 예외처리
         print('student cant set questions')
         con.close()
         return
     else:
+        print('dd')
         lock.acquire()
+        print(data)
         c.executemany(
             "INSERT INTO quizTBL(Subject, Quiz, Answer) VALUES(?, ?, ?)", (data,))
         con.commit()
@@ -370,6 +372,8 @@ def call_func(clnt_num, instruction):
         send_list(clnt_num)
     elif instruction == 'invite OK':
         get_chat(clnt_num)
+    elif instruction.startswith('set_q'):
+        set_question(clnt_num, instruction)
     else:
         return
 

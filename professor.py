@@ -28,7 +28,7 @@ class SocketClient(QThread):
 
 
 
-            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@set_q') or data.startswith('@invite'):
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@list_q') or data.startswith('@invite'):
                 self.add_user.emit(data)
                 print("시그널메세지",data)
 
@@ -55,6 +55,7 @@ class Professor_Window(QMainWindow, form_main):
         self.chat_widget.hide()
         self.quiz_widget.hide()
         self.make_widget.hide()
+        self.row = 1
 
         self.t1.start()
 
@@ -90,6 +91,8 @@ class Professor_Window(QMainWindow, form_main):
         self.sign_pw.setEchoMode(QLineEdit.Password)
         self.sign_pw_2.setEchoMode(QLineEdit.Password)
         self.login_pw.setEchoMode(QLineEdit.Password)
+        self.listWidget_2.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+
 
 
 
@@ -183,10 +186,19 @@ class Professor_Window(QMainWindow, form_main):
         elif msg.startswith('@chat'):
             msg = msg.replace('@chat ', '', 1)
             self.chat_bro_2.append(msg)
-        elif msg.startswith('@set_q'):
-            msg = msg.replace('@set_q ', '', 1)
-            for i in msg.split("@set_q "):
-                self.listWidget_2.addItem(i)
+        elif msg.startswith('@list_q'):
+            msg = msg.replace('@list_q ', '', 1)
+
+            for i in msg.split("@list_q "):
+                if i == "done" or i == "empty":
+                    self.row = 1
+                    break
+
+                self.listWidget_2.setRowCount(self.row)
+                self.listWidget_2.setItem(self.row-1, 0, QTableWidgetItem(i.split("/")[2]))
+                self.listWidget_2.setItem(self.row-1, 1, QTableWidgetItem(i.split("/")[3]))
+                self.row += 1
+
         elif msg.startswith('@invite'):
             if msg == "@invite":
                 buttonReply = QMessageBox.information(self, '상담요청', "상담할래?", QMessageBox.Yes | QMessageBox.No)
@@ -216,26 +228,26 @@ class Professor_Window(QMainWindow, form_main):
 
     def quiz_time(self):
         self.menu_widget.hide()
-        self.listWidget_2.clear()
+        self.listWidget_2.clearContents()
 
-        self.radio = [self.surv_radiobtn, self.land_radiobtn, self.char_radiobtn]
-        for i in self.radio:
-            if i.isChecked():
-                table = i.text()
-        self.t1.send(f"@set_q/{self.surv_radiobtn.text()}")
+        self.t1.send(f"@list_q/{self.surv_radiobtn.text()}")
         self.quiz_widget.show()
 
     def send_serv(self):
-        for i in self.radio:
+        radio = [self.surv_radiobtn,self.land_radiobtn,self.char_radiobtn]
+        for i in radio:
             if i.isChecked():
                 table = i.text()
+                break
         quiz = self.lineEdit.text()
         answer = self.lineEdit_2.text()
-        self.t1.send(f'')
+        self.t1.send(f'@set_q/{table}/{quiz}/{answer}')
+        self.lineEdit.clear()
+        self.lineEdit_2.clear()
 
     def radio_check(self, a):
-        self.listWidget_2.clear()
-        self.t1.send(a)
+        self.listWidget_2.clearContents()
+        self.t1.send(f"@list_q/{a}")
 
 
 
