@@ -190,4 +190,5 @@ class Student_Window(QMainWindow, form_stu):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Student_Window()
+    win.setWindowTitle('학생')
     sys.exit(app.exec())
