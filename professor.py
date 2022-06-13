@@ -4,11 +4,12 @@ from PyQt5 import uic
 from PyQt5 import QtCore
 from PyQt5.QtCore import QThread, pyqtSlot
 from socket import *
+from PyQt5.QtGui import *
 
 form_main = uic.loadUiType("professor.ui")[0]
 
 class SocketClient(QThread):  # 서버와 클라이언트 그리고 서버에서 받은 메세지와 메인 구동클래스를 연결시켜주는 클래스
-    add_user = QtCore.pyqtSignal(str) # pyqt5 solot을 이용항 쿨랴스 캑체
+    add_user = QtCore.pyqtSignal(str) # pyqt5 solot을 이용한 클래스 객체
 
     def __init__(self, parent=None):
         super().__init__()
@@ -26,8 +27,8 @@ class SocketClient(QThread):  # 서버와 클라이언트 그리고 서버에서
             data = self.cnn.recv(1024)
             data = data.decode()
 
-            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@list_q') or data.startswith('@invite'):
-                self.add_user.emit(data) #구동클레스에 데이터 전달
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@list_q') or data.startswith('@invite') or data.startswith("@QnA"):
+                self.add_user.emit(data) #구동클래스에 데이터 전달
                 print("커멘드메세지",data)
 
             else:
@@ -50,6 +51,8 @@ class Professor_Window(QMainWindow, form_main):
         self.quiz_widget.hide()
         self.make_widget.hide()
         self.sign_widget.hide()
+        self.qn_widget.hide()
+        self.anser_widget.hide()
         self.row = 1
         self.t1.start()
         self.show()
@@ -58,7 +61,7 @@ class Professor_Window(QMainWindow, form_main):
         self.sign_up_btn.clicked.connect(self.sign_up) #회원가입 버튼을 누를시
         self.back_btn.clicked.connect(self.sign_up_exit) #뒤로가기 버튼을 누를시
         self.confirm_btn.clicked.connect(self.sign_up_cf) #회원가입확인 버튼을 누를시
-        self.login_btn.clicked.connect(self.login)  # 로그인 버튼 눌럿을때
+        self.login_btn.clicked.connect(self.login)  # 로그인 버튼 누를시
         self.idcheck_btn.clicked.connect(self.overlap_id) #중복확인 버튼을 누를시
         self.chat_btn.clicked.connect(self.chating) #메뉴에서 채팅버튼을 누를시
         self.t1.add_user.connect(self.add_user) # 중요 q스레드 클래스와 메인클래스를 연결시키는 시그널
@@ -66,15 +69,22 @@ class Professor_Window(QMainWindow, form_main):
         self.conect_btn.clicked.connect(self.connect_chat)
         self.listWidget.itemClicked.connect(lambda: self.conect_btn.setDisabled(False))
         self.chat_exit_bt.clicked.connect(self.connect_exit)
-        self.quiz_btn.clicked.connect(self.quiz_time)
+        self.quiz_btn.clicked.connect(self.quiz_time) #qiuz 버튼 누를시
         self.back_btn_2.clicked.connect(self.quiz_back)
         self.sub_btn.clicked.connect(self.send_quiz)
         self.surv_radiobtn.clicked.connect(lambda :self.radio_check(self.surv_radiobtn.text()))
         self.land_radiobtn.clicked.connect(lambda :self.radio_check(self.land_radiobtn.text()))
         self.char_radiobtn.clicked.connect(lambda :self.radio_check(self.char_radiobtn.text()))
-        self.backback_btn.clicked.connect(self.hide)
+        self.backback_btn.clicked.connect(self.hide_)
         self.send_btn.clicked.connect(self.send_serv)
         self.send_btn_2.clicked.connect(self.send_chat_msg)
+        self.qa_btn.clicked.connect(self.send_qna)
+        self.qn_back_btn.clicked.connect(self.qna_back)
+        self.qn_anser_btn.clicked.connect(self.answer_qna)
+        self.anser_back.clicked.connect(self.answer_back)
+        self.anser_btn2.clicked.connect(self.qna_serv)
+        self.tableWidget.cellClicked.connect(lambda :self.qn_anser_btn.setDisabled(False))
+
 
     def initUI(self):
         self.setupUi(self)
@@ -82,10 +92,21 @@ class Professor_Window(QMainWindow, form_main):
         self.sign_pw_2.setEchoMode(QLineEdit.Password)
         self.login_pw.setEchoMode(QLineEdit.Password)
         self.listWidget_2.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch) #문제풀기 기능에서 테이블위젯의 컬럼의 비율
+        # self.tableWidget.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch) #문제풀기 기능에서 테이블위젯의 컬럼의 비율
+        # ----------------------------------------------------------------------
+        palette = QPalette()
+        palette.setBrush(QPalette.Background, QBrush(QPixmap("dino.png")))
+        self.setPalette(palette)
+        # ---------------------------------------------------------------------
+        self.tableWidget.setColumnWidth(0,590)#컬럼 크기맞추기
+        self.tableWidget.setColumnWidth(2,150)
+        self.tableWidget.setColumnWidth(3,150)
+        self.tableWidget.setColumnWidth(1,146)
 
     def sign_up(self): # 회원가입 버튼 누를때 서버에 상황전달
         self.t1.send("@sign_up")
         self.sign_widget.show()
+        self.login_widget.hide()
 
     def sign_up_exit(self): #종료 버튼누를시 화원가입 위젯 초기화
         self.t1.send('exit')
@@ -96,12 +117,15 @@ class Professor_Window(QMainWindow, form_main):
         self.sign_pw.clear()
         self.sign_pw_2.clear()
         self.sign_widget.close()
+        self.login_widget.show()
+
+
     def overlap_id(self): #중복체크 버튼을 누를시 아이디 서버에 전송
         id = self.sign_id.text()
         sys.stdin.flush()
         self.t1.send(id)
 
-    def sign_up_cf(self): #획인 버튼 누를시 정규식 검사
+    def sign_up_cf(self): #확인 버튼 누를시 정규식 검사
         sign_check = True
         if self.sign_pw.text() != self.sign_pw_2.text(): #비밀번호 확인
             sign_check = False
@@ -118,11 +142,12 @@ class Professor_Window(QMainWindow, form_main):
             self.sign_pw.clear()
             self.sign_pw_2.clear()
             self.sign_widget.close()
+            self.login_widget.show()
 
     def login(self):  # 로그인 버튼 눌럿을때 서버에 아이디 비밀번호 전달
         self.t1.send(f"@log_in/{self.login_id.text()}/{self.login_pw.text()}")
 
-    def chating(self): # 메뉴에서 채팅버튼 누를시 서버에 현제 접속된 학생 요청
+    def chating(self): # 메뉴에서 채팅버튼 누를시 서버에 현재 접속된 학생 요청
         self.menu_widget.hide()
         self.t1.send("@member")
 
@@ -141,12 +166,12 @@ class Professor_Window(QMainWindow, form_main):
         if msg.startswith('@sign_up'):
             msg = msg.replace('@sign_up ', '', 1)
 
-            if msg == 'OK':
+            if msg == 'OK': # 중복체크 통과시
                 self.id_check = True
                 QMessageBox.about(self, '중복', '사용 가능한 아이디 입니다')
                 self.sign_id.setDisabled(True)
-                self.idcheck_btn.setDisabled(True)
-            elif msg == 'NO':
+                self.idcheck_btn.setDisabled(True) # 버튼비활성화
+            elif msg == 'NO': # 중복체크 통과못할시
                 self.id_check = False
                 QMessageBox.about(self, '중복', '중복된 아이디 입니다')
                 self.sign_id.setDisabled(False)
@@ -155,13 +180,13 @@ class Professor_Window(QMainWindow, form_main):
                 self.id_check = False
         elif msg.startswith('@log_in'):
             msg = msg.replace('@log_in ', '', 1)
-            if msg == 'sucess':
+            if msg == 'sucess': #로그인 성공시
                 self.login_widget.hide()
                 self.menu_widget.show()
-            elif msg == 'ID error':
+            elif msg == 'ID error': #ID 잘못입력했을때
                 QMessageBox.about(self, '경고', '아이디가 잘못 되었습니다')
 
-            else:
+            else: #PW 잘못입력했을때
                 QMessageBox.about(self, '경고', '비밀번호가 잘못 되었습니다')
             self.login_id.clear()
             self.login_pw.clear()
@@ -176,15 +201,15 @@ class Professor_Window(QMainWindow, form_main):
         elif msg.startswith('@list_q'):
             msg = msg.replace('@list_q ', '', 1)
 
-            for i in msg.split("@list_q "):
+            for i in msg.split("@list_q "): #클라이언트에서 처리가 늦어 버퍼가 이어서 들어올때 나눠줘야한다
                 if i == "done" or i == "empty":
-                    self.row = 1
+                    self.row = 1 # done이 출력되면 카운트 초기화
                     break
 
-                self.listWidget_2.setRowCount(self.row)
+                self.listWidget_2.setRowCount(self.row) #문제 갯수대로 열생성
                 self.listWidget_2.setItem(self.row-1, 0, QTableWidgetItem(i.split("/")[2]))
                 self.listWidget_2.setItem(self.row-1, 1, QTableWidgetItem(i.split("/")[3]))
-                self.row += 1
+                self.row += 1 #문제 갯수 카운트
 
         elif msg.startswith('@invite'):
             if msg == "@invite":
@@ -198,6 +223,20 @@ class Professor_Window(QMainWindow, form_main):
                 else:
                     self.t1.send('@invite NO')
 
+        elif msg.startswith('@QnA'):
+            msg = msg.replace('@QnA ', '', 1)
+
+            for i in msg.split('@QnA '):
+                if i == "done" or i == "empty":
+                    break
+
+                self.tableWidget.setRowCount(int(i.split('/')[0])) # 문제 갯수대로 열생성
+                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 0, QTableWidgetItem(i.split("/")[1]))
+                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 3, QTableWidgetItem(i.split("/")[2]))
+                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 1, QTableWidgetItem(i.split("/")[3]))
+                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 2, QTableWidgetItem(i.split("/")[4]))
+
+
 
     def closeEvent(self, event):
         self.t1.send("@exit")
@@ -208,27 +247,29 @@ class Professor_Window(QMainWindow, form_main):
         self.t1.send(f"@chat/{self.listWidget.currentItem().text()}")
         self.select_widget.hide()
         self.chat_widget.show()
-    def send_chat_msg(self):
+
+
+    def send_chat_msg(self): # 메세지 서버에 전송
         self.t1.send(f"@chat {self.chat_input_2.text()}")
         self.chat_input_2.clear()
 
 
-    def quiz_time(self):
+    def quiz_time(self): #quiz버튼을 누를시
         self.menu_widget.hide()
         self.listWidget_2.clearContents()
 
         self.t1.send(f"@list_q/{self.surv_radiobtn.text()}")
         self.quiz_widget.show()
 
-    def send_serv(self):
+    def send_serv(self): #문제출제하기버튼 눌렀을 때
         radio = [self.surv_radiobtn,self.land_radiobtn,self.char_radiobtn]
-        for i in radio:
+        for i in radio: #라디오버튼 체크항목
             if i.isChecked():
                 table = i.text()
                 break
         quiz = self.lineEdit.text()
         answer = self.lineEdit_2.text()
-        self.t1.send(f'@set_q/{table}/{quiz}/{answer}')
+        self.t1.send(f'@set_q/{table}/{quiz}/{answer}') #서버에 테이블/문제/답 전송
         self.lineEdit.clear()
         self.lineEdit_2.clear()
 
@@ -243,7 +284,7 @@ class Professor_Window(QMainWindow, form_main):
         self.quiz_widget.hide()
         self.menu_widget.show()
 
-    def hide(self):
+    def hide_(self): #back버튼 누를시 출제한 내용 보여주기
         self.make_widget.hide()
         radio = [self.surv_radiobtn, self.land_radiobtn, self.char_radiobtn]
         for i in radio:
@@ -252,6 +293,50 @@ class Professor_Window(QMainWindow, form_main):
                 break
 
         self.t1.send(f"@list_q/{table}")
+
+
+    def send_qna(self):
+        self.menu_widget.hide()
+        self.qn_anser_btn.setDisabled(True)
+        self.qn_widget.show()
+        self.t1.send("@QnA")
+
+
+
+
+    def qna_back(self):
+        self.qn_widget.hide()
+        self.menu_widget.show()
+        self.t1.send("@exit")
+
+
+
+
+    def answer_qna(self):
+        self.anser_widget.show()
+        self.qn_widget.hide()
+        self.menu_widget.hide()
+
+        for i in self.tableWidget.selectedIndexes():
+            self.num = i.row()
+            break
+        self.Questions_label.setText(self.tableWidget.item(self.num,0).text())
+
+
+
+    def answer_back(self):
+        self.anser_widget.hide()
+        self.textEdit.clear()
+        self.qn_widget.show()
+
+
+    def qna_serv(self):
+        qna_answer = self.textEdit.toPlainText()
+        self.t1.send(f'{self.num+1}/{qna_answer}')
+        self.textEdit.clear()
+        self.anser_widget.hide()
+        self.qn_widget.show()
+
 
 
 

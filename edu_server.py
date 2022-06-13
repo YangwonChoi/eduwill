@@ -37,17 +37,18 @@ def send_clnt_msg(clnt_sock, msg):
 #클라이언트 종료시 해당 클라이언트 정보를 clnt_imfor 리스트에서 그 뒤의 정보로 덮어씌움
 def delete_imfor(clnt_sock):
     global clnt_cnt
-    lock.acquire()
-    for i in range(0, clnt_cnt):
-        if clnt_sock == clnt_imfor[i][0]:  # 해당 소켓 가진 클라이언트 정보 찾기
-            print('exit client')
-            while i < clnt_cnt - 1:  # 그 뒤에 있는 클라이언트 정보들을 한 칸씩 앞으로 당겨옴
-                clnt_imfor[i] = clnt_imfor[i + 1]
-                i += 1
-            break
+    if clnt_cnt == 1:
+        clnt_imfor.clear()
+        print('exit client')
+    else:
+        for i in range(0, clnt_cnt):
+            if clnt_sock == clnt_imfor[i][0]:  # 해당 소켓 가진 클라이언트 정보 찾기
+                print('exit client')
+                while i < clnt_cnt - 1:  # 그 뒤에 있는 클라이언트 정보들을 한 칸씩 앞으로 당겨옴
+                    clnt_imfor[i] = clnt_imfor[i + 1]
+                    i += 1
+                break
     clnt_cnt -= 1
-    lock.release()
-    clnt_sock.close()
 
 
 #회원가입
@@ -142,7 +143,7 @@ def QnA_ctrl_func(clnt_num):
     con, c = get_DBcursor()
     type = clnt_imfor[clnt_num][2]
     if type == 'stu':
-        c.execute('SELECT * FROM Q&ATBL WHERE ID=?', (clnt_imfor[clnt_num][1],))
+        c.execute('SELECT * FROM QnATBL WHERE ID=?', (clnt_imfor[clnt_num][1],))
         rows = c.fetchall()
         if not c:  #등록된 질문 없을 시 X send
             send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA empty')
@@ -160,11 +161,11 @@ def QnA_ctrl_func(clnt_num):
                 return
             else:
                 msg = msg.split('/')
-                c.executemany('INSERT INTO Q&ATBL(ID, Date, Question) VALUES(?, ?, ?)', (msg,))
+                c.executemany('INSERT INTO QnATBL(ID, Date, Question) VALUES(?, ?, ?)', (msg,))
                 con.commit()
                 con.close()
     elif type == 'tea':
-        c.execute('SELECT * FROM Q&ATBL')
+        c.execute('SELECT * FROM QnATBL')
         rows = c.fetchall()
         if not c:  #등록된 질문 없을 시 X send
             send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA empty')
@@ -185,7 +186,7 @@ def QnA_ctrl_func(clnt_num):
             else:
                 answer = msg.split('/')
                 num = int(answer[0])
-                c.execute('UPDATE Q&ATBL SET Answer=? WHERE No=?', (num, answer[1]))
+                c.execute('UPDATE QnATBL SET Answer=? WHERE No=?', (num, answer[1]))
                 con.commit()
     else:
         print('type error in QA')
@@ -389,9 +390,10 @@ def handle_clnt(clnt_sock):
 
     while True:
         clnt_msg = recv_clnt_msg(clnt_sock)
-        if not clnt_msg:                        # 클라이언트 연결 끊길 시
+        if clnt_msg == '@exit':                        # 클라이언트 연결 끊길 시
             lock.acquire()
             delete_imfor(clnt_sock)
+            clnt_sock.close()
             lock.release()
             break
 
