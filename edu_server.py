@@ -142,7 +142,7 @@ def QnA_ctrl_func(clnt_num):
     con, c = get_DBcursor()
     type = clnt_imfor[clnt_num][2]
     if type == 'stu':
-        c.execute('SELECT * FROM Q&ATBL WHERE ID=?', (clnt_imfor[clnt_num][1],))
+        c.execute('SELECT * FROM QnATBL WHERE ID=?', (clnt_imfor[clnt_num][1],))
         rows = c.fetchall()
         if not c:  #등록된 질문 없을 시 X send
             send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA empty')
@@ -160,11 +160,11 @@ def QnA_ctrl_func(clnt_num):
                 return
             else:
                 msg = msg.split('/')
-                c.executemany('INSERT INTO Q&ATBL(ID, Date, Question) VALUES(?, ?, ?)', (msg,))
+                c.executemany('INSERT INTO QnATBL(ID, Date, Question) VALUES(?, ?, ?)', (msg,))
                 con.commit()
                 con.close()
     elif type == 'tea':
-        c.execute('SELECT * FROM Q&ATBL')
+        c.execute('SELECT * FROM QnATBL')
         rows = c.fetchall()
         if not c:  #등록된 질문 없을 시 X send
             send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA empty')
@@ -185,7 +185,7 @@ def QnA_ctrl_func(clnt_num):
             else:
                 answer = msg.split('/')
                 num = int(answer[0])
-                c.execute('UPDATE Q&ATBL SET Answer=? WHERE No=?', (num, answer[1]))
+                c.execute('UPDATE QnATBL SET Answer=? WHERE No=?', (num, answer[1]))
                 con.commit()
     else:
         print('type error in QA')
@@ -366,7 +366,7 @@ def call_func(clnt_num, instruction):
         log_in(clnt_num, instruction)
     elif instruction.startswith('list_q'):
         send_questions(clnt_num, instruction)
-    elif instruction == 'QnA':
+    elif instruction == 'Q&A':
         QnA_ctrl_func(clnt_num)
     elif instruction.startswith('chat'):
         set_chat_state(clnt_num, instruction)
