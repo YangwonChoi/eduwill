@@ -14,9 +14,12 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: rgb(252, 175, 62);</string>
+   <string notr="true">￣</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(252, 175, 62);</string>
+   </property>
    <widget class="QWidget" name="login_widget" native="true">
     <property name="geometry">
      <rect>
@@ -1334,6 +1337,96 @@ border-radius: 15px}
      </property>
     </widget>
    </widget>
+   <widget class="QWidget" name="widget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>70</y>
+      <width>1091</width>
+      <height>511</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(238, 238, 236);</string>
+    </property>
+    <widget class="QTableWidget" name="tableWidget">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>90</y>
+       <width>1051</width>
+       <height>321</height>
+      </rect>
+     </property>
+     <column>
+      <property name="text">
+       <string>제목</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>작성자</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>답변여부</string>
+      </property>
+     </column>
+    </widget>
+    <widget class="QLabel" name="label_14">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>30</y>
+       <width>211</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>21</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Q&amp;A 게시판</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="qn_back_btn">
+     <property name="geometry">
+      <rect>
+       <x>310</x>
+       <y>440</y>
+       <width>131</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>back</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="qn_anser_btn">
+     <property name="geometry">
+      <rect>
+       <x>550</x>
+       <y>440</y>
+       <width>121</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>답변하기</string>
+     </property>
+    </widget>
+   </widget>
+   <zorder>sign_widget</zorder>
+   <zorder>select_widget</zorder>
+   <zorder>quiz_widget</zorder>
+   <zorder>chat_widget</zorder>
+   <zorder>login_widget</zorder>
+   <zorder>make_widget</zorder>
+   <zorder>menu_widget</zorder>
+   <zorder>widget</zorder>
   </widget>
  </widget>
  <resources/>
