@@ -37,17 +37,18 @@ def send_clnt_msg(clnt_sock, msg):
 #클라이언트 종료시 해당 클라이언트 정보를 clnt_imfor 리스트에서 그 뒤의 정보로 덮어씌움
 def delete_imfor(clnt_sock):
     global clnt_cnt
-    lock.acquire()
-    for i in range(0, clnt_cnt):
-        if clnt_sock == clnt_imfor[i][0]:  # 해당 소켓 가진 클라이언트 정보 찾기
-            print('exit client')
-            while i < clnt_cnt - 1:  # 그 뒤에 있는 클라이언트 정보들을 한 칸씩 앞으로 당겨옴
-                clnt_imfor[i] = clnt_imfor[i + 1]
-                i += 1
-            break
+    if clnt_cnt == 1:
+        clnt_imfor.clear()
+        print('exit client')
+    else:
+        for i in range(0, clnt_cnt):
+            if clnt_sock == clnt_imfor[i][0]:  # 해당 소켓 가진 클라이언트 정보 찾기
+                print('exit client')
+                while i < clnt_cnt - 1:  # 그 뒤에 있는 클라이언트 정보들을 한 칸씩 앞으로 당겨옴
+                    clnt_imfor[i] = clnt_imfor[i + 1]
+                    i += 1
+                break
     clnt_cnt -= 1
-    lock.release()
-    clnt_sock.close()
 
 
 #회원가입
@@ -366,7 +367,7 @@ def call_func(clnt_num, instruction):
         log_in(clnt_num, instruction)
     elif instruction.startswith('list_q'):
         send_questions(clnt_num, instruction)
-    elif instruction == 'Q&A':
+    elif instruction == 'QnA':
         QnA_ctrl_func(clnt_num)
     elif instruction.startswith('chat'):
         set_chat_state(clnt_num, instruction)
@@ -389,9 +390,10 @@ def handle_clnt(clnt_sock):
 
     while True:
         clnt_msg = recv_clnt_msg(clnt_sock)
-        if not clnt_msg:                        # 클라이언트 연결 끊길 시
+        if clnt_msg == '@exit':                        # 클라이언트 연결 끊길 시
             lock.acquire()
             delete_imfor(clnt_sock)
+            clnt_sock.close()
             lock.release()
             break
 
