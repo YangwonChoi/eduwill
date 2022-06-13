@@ -766,15 +766,18 @@ background-color: rgb(49, 48, 48);
         <widget class="QPushButton" name="quiz_btn">
          <property name="geometry">
           <rect>
-           <x>-10</x>
+           <x>0</x>
            <y>0</y>
-           <width>551</width>
-           <height>261</height>
+           <width>542</width>
+           <height>252</height>
           </rect>
          </property>
          <property name="font">
           <font>
+           <family>Bahnschrift SemiCondensed</family>
            <pointsize>40</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
           </font>
          </property>
          <property name="text">
@@ -788,15 +791,18 @@ background-color: rgb(49, 48, 48);
         <widget class="QPushButton" name="learn_btn">
          <property name="geometry">
           <rect>
-           <x>-30</x>
+           <x>0</x>
            <y>0</y>
-           <width>581</width>
-           <height>261</height>
+           <width>542</width>
+           <height>252</height>
           </rect>
          </property>
          <property name="font">
           <font>
+           <family>Bahnschrift SemiCondensed</family>
            <pointsize>40</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
           </font>
          </property>
          <property name="acceptDrops">
@@ -806,7 +812,8 @@ background-color: rgb(49, 48, 48);
           <bool>false</bool>
          </property>
          <property name="styleSheet">
-          <string notr="true"/>
+          <string notr="true">
+</string>
          </property>
          <property name="inputMethodHints">
           <set>Qt::ImhNone</set>
@@ -837,15 +844,18 @@ background-color: rgb(49, 48, 48);
         <widget class="QPushButton" name="chat_btn">
          <property name="geometry">
           <rect>
-           <x>-10</x>
-           <y>-10</y>
-           <width>551</width>
-           <height>261</height>
+           <x>0</x>
+           <y>0</y>
+           <width>542</width>
+           <height>252</height>
           </rect>
          </property>
          <property name="font">
           <font>
+           <family>Bahnschrift SemiCondensed</family>
            <pointsize>40</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
           </font>
          </property>
          <property name="text">
@@ -860,14 +870,17 @@ background-color: rgb(49, 48, 48);
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>-10</y>
-           <width>551</width>
-           <height>261</height>
+           <y>0</y>
+           <width>542</width>
+           <height>252</height>
           </rect>
          </property>
          <property name="font">
           <font>
+           <family>Bahnschrift SemiCondensed</family>
            <pointsize>40</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
           </font>
          </property>
          <property name="text">

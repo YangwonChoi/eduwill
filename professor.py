@@ -97,6 +97,54 @@ class Professor_Window(QMainWindow, form_main):
         palette = QPalette()
         palette.setBrush(QPalette.Background, QBrush(QPixmap("dino.png")))
         self.setPalette(palette)
+        self.learn_btn.setStyleSheet("""
+        QPushButton {
+        color: rgb(68, 255, 0);
+            background-image : url(ss.png); 
+        }
+        QPushButton:hover {
+            background-image : url(ssdd.png);
+        }
+        QPushButton:pressed{
+background-image : url(ssdds.png);}
+
+    """)
+        self.quiz_btn.setStyleSheet("""
+                QPushButton {
+                color: rgb(68, 255, 0);
+                    background-image : url(ss.png); 
+                }
+                QPushButton:hover {
+                    background-image : url(ssdd.png);
+                }
+                QPushButton:pressed{
+        background-image : url(ssdds.png);}
+
+            """)
+        self.qa_btn.setStyleSheet("""
+                QPushButton {
+                color: rgb(68, 255, 0);
+                    background-image : url(ss.png); 
+                }
+                QPushButton:hover {
+                    background-image : url(ssdd.png);
+                }
+                QPushButton:pressed{
+        background-image : url(ssdds.png);}
+
+            """)
+        self.chat_btn.setStyleSheet("""
+                QPushButton {
+                    color: rgb(68, 255, 0);
+                    background-image : url(ss.png); 
+                }
+                QPushButton:hover {
+                    background-image : url(ssdd.png);
+                }
+                QPushButton:pressed{
+        background-image : url(ssdds.png);}
+
+            """)
         # ---------------------------------------------------------------------
         self.tableWidget.setColumnWidth(0,590)#컬럼 크기맞추기
         self.tableWidget.setColumnWidth(2,150)
