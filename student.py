@@ -5,6 +5,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QThread, pyqtSlot
 from socket import *
 import sqlite3
+import datetime
 
 
 form_stu = uic.loadUiType("student.ui")[0]
@@ -73,6 +74,11 @@ class Student_Window(QMainWindow, form_stu):
         self.title_btn.clicked.connect(self.lean_dino) # 공룡 버튼 눌렀을때
         self.lean_exit_btn.clicked.connect(self.lean_exit) # 학습 종료버튼 눌렀을때
         self.listWidget.itemClicked.connect(self.item_clicked)
+        self.qa_btn.clicked.connect(self.send_qna)###########현성
+        self.qn_back_btn.clicked.connect(self.qna_back)
+        self.qn_anser_btn.clicked.connect(self.answer_qna)
+        self.anser_back.clicked.connect(self.answer_back)
+        self.reg_btn.clicked.connect(self.q_a_reg)
 
     def initUI(self):
         self.setupUi(self)
@@ -83,9 +89,17 @@ class Student_Window(QMainWindow, form_stu):
         self.chat_widget.hide()  # 상담 채팅 위젯
         self.select_widget.hide()  # 상담 리스트 위젯
         self.dino_widget.hide() # 학습 위젯
+        self.widget_2.hide()################################
+        self.qn_widget.hide()
+        self.widget.hide()
+        self.quiz_widget.hide()#####################################
         self.sign_pw.setEchoMode(QLineEdit.Password)
         self.sign_pw_2.setEchoMode(QLineEdit.Password)
         self.login_pw.setEchoMode(QLineEdit.Password)
+        self.tableWidget.setColumnWidth(0, 590)  # 컬럼 크기맞추기
+        self.tableWidget.setColumnWidth(2, 150)
+        self.tableWidget.setColumnWidth(3, 150)
+        self.tableWidget.setColumnWidth(1, 146)
         
 
     def sign_up(self):  #회원가입 버튼 눌렀을때
@@ -190,15 +204,6 @@ class Student_Window(QMainWindow, form_stu):
         self.dino_type.setText(rows[9])
         self.dino_info.setText(rows[8])
 
-
-
-
-
-
-
-
-
-
     @pyqtSlot(str) 
     def add_user(self, msg):
         if msg.startswith('@sign_up'):
@@ -251,6 +256,32 @@ class Student_Window(QMainWindow, form_stu):
         self.chat_widget.show()
         self.t1.send(f"@chat/{self.listWidget_2.currentItem().text()}")
         print(self.listWidget_2.currentItem().text())
+
+    def send_qna(self):
+        self.menu_widget.hide()
+        self.qn_widget.show()
+        self.t1.send("@QnA")
+
+    def qna_back(self):
+        self.qn_widget.hide()
+        self.menu_widget.show()
+        self.t1.send("@exit")
+
+    def answer_qna(self):
+        self.widget_2.show()
+        self.qn_widget.hide()
+        self.menu_widget.hide()
+
+    def answer_back(self):
+        self.widget_2.hide()
+        self.lineEdit.clear()
+        self.qn_widget.show()
+    def q_a_reg(self):
+        # self.t1.send(f"{}")
+
+        self.widget_2.hide()
+        self.lineEdit.clear()
+        self.qn_widget.show()
 
 
 if __name__ == "__main__":
