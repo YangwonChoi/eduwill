@@ -163,7 +163,12 @@ def QnA_ctrl_func(clnt_num):
                 msg = msg.split('/')
                 c.executemany('INSERT INTO QnATBL(ID, Date, Question) VALUES(?, ?, ?)', (msg,))
                 con.commit()
-                con.close()
+                for row in rows:
+                    row = list(row)
+                    row[0] = str(row[0])
+                    row = '/'.join(row)
+                    send_clnt_msg(clnt_imfor[clnt_num][0], ('@QnA ' + row))
+                send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA done')
     elif type == 'tea':
         c.execute('SELECT * FROM QnATBL')
         rows = c.fetchall()
@@ -200,6 +205,8 @@ def QnA_ctrl_func(clnt_num):
         print('type error in QA')
         con.close()
         return
+    con.close()
+    return
 
 
 #문제 리스트 보내는 함수
