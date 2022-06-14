@@ -202,14 +202,13 @@ class Student_Window(QMainWindow, form_stu):
         self.conect_btn.setDisabled(True)
 
     def connect_exit(self): # 상담리스트 종료버튼 눌렀을때
-        self.t1.send("@exit")
         self.select_widget.hide()
         self.menu_widget.show()
 
     def chat_exit(self): # 상담 종료버튼 눌렀을때
         self.t1.send("@exit")
         self.chat_widget.hide()
-        self.select_widget.show()
+        self.menu_widget.show()
 
     def chat_send(self): #상담 보내기버튼 눌렀을때
         self.t1.send(f"@chat {self.chat_input.text()}")
@@ -304,6 +303,7 @@ class Student_Window(QMainWindow, form_stu):
                 if buttonReply == QMessageBox.Yes:
                     self.t1.send('@invite OK')
                     self.chat_widget.show()
+                    self.menu_widget.hide()
         elif msg.startswith('@QnA'):
             msg = msg.replace('@QnA ', '', 1)
 

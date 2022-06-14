@@ -50,6 +50,7 @@ class Professor_Window(QMainWindow, form_main):
         self.chat_widget.hide()
         self.quiz_widget.hide()
         self.make_widget.hide()
+        self.statistics_widget.hide()
         self.sign_widget.hide()
         self.qn_widget.hide()
         self.anser_widget.hide()
@@ -203,7 +204,6 @@ background-image : url(ssdds.png);}
         self.select_widget.show()
 
     def connect_exit(self):
-        self.t1.send("@exit")
         self.select_widget.hide()
         self.chat_widget.hide()
         self.menu_widget.show()
@@ -279,9 +279,9 @@ background-image : url(ssdds.png);}
                     break
 
                 self.tableWidget.setRowCount(int(i.split('/')[0])) # 문제 갯수대로 열생성
-                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 0, QTableWidgetItem(i.split("/")[1]))
+                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 0, QTableWidgetItem(i.split("/")[3]))
                 self.tableWidget.setItem(int(i.split('/')[0]) - 1, 3, QTableWidgetItem(i.split("/")[2]))
-                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 1, QTableWidgetItem(i.split("/")[3]))
+                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 1, QTableWidgetItem(i.split("/")[1]))
                 self.tableWidget.setItem(int(i.split('/')[0]) - 1, 2, QTableWidgetItem(i.split("/")[4]))
 
 
@@ -326,6 +326,7 @@ background-image : url(ssdds.png);}
         self.t1.send(f"@list_q/{a}")
 
     def send_quiz(self):
+        self.quiz_widget.hide()
         self.make_widget.show()
 
     def quiz_back(self):
@@ -341,6 +342,7 @@ background-image : url(ssdds.png);}
                 break
 
         self.t1.send(f"@list_q/{table}")
+        self.quiz_widget.show()
 
 
     def send_qna(self):
@@ -379,7 +381,7 @@ background-image : url(ssdds.png);}
 
 
     def qna_serv(self):
-        qna_answer = self.textEdit.toPlainText()
+        qna_answer = self.textEdit.text()
         self.t1.send(f'{self.num+1}/{qna_answer}')
         self.textEdit.clear()
         self.anser_widget.hide()
@@ -393,3 +395,4 @@ if __name__ == "__main__":
     win = Professor_Window()
     win.setWindowTitle('교수')
     sys.exit(app.exec())
+
