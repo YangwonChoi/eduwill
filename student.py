@@ -11,7 +11,7 @@ form_stu = uic.loadUiType("student.ui")[0]
 
 #DB 연결, 커서획득 함수
 def get_DBcursor():
-    con = sqlite3.connect('clnt.db')  # DB open
+    con = sqlite3.connect('clntDB')  # DB open
     c = con.cursor()  # 커서 획득
     return (con, c)
 
@@ -72,7 +72,7 @@ class Student_Window(QMainWindow, form_stu):
         self.learn_btn.clicked.connect(self.lean_title) # 학습 버튼 눌렀을때
         self.title_btn.clicked.connect(self.lean_dino) # 공룡 버튼 눌렀을때
         self.lean_exit_btn.clicked.connect(self.lean_exit) # 학습 종료버튼 눌렀을때
-        self.listWidget.itemSelectionChanged.connect(self.dino_list)
+        self.listWidget.itemClicked.connect(self.item_clicked)
 
     def initUI(self):
         self.setupUi(self)
@@ -155,6 +155,14 @@ class Student_Window(QMainWindow, form_stu):
     def lean_dino(self):
         self.lean_menu_widget.hide()
         self.dino_widget.show()
+        con, c = get_DBcursor()
+        c.execute("SELECT 한글명 FROM study")
+        rows = c.fetchall()
+        rows = list(rows)
+        for row in rows:
+            row = list(row)
+            self.listWidget.addItem(f'{row}')
+        con.close()
         print("학습창")
 
     def lean_exit(self):
@@ -163,13 +171,19 @@ class Student_Window(QMainWindow, form_stu):
         self.menu_widget.show()
         print("학습종료")
 
-    def dino_list(self):
-        con, c = get_DBcursor()
-        c.execute("SELECT 한글명 FROM study")
-        dino = c.fetchall()
-        dino_item = self.listWidget.selectedItems()
-        self.dino_item.show()
 
+
+    def item_clicked(self):
+        print("self.listWidget.currentItem().text()")
+        con, c = get_DBcursor()
+        c.execute("SELECT * FROM study where 한글명 = ?", (self.listWidget.currentItem().text(),))
+        rows = c.fetchone()
+        rows = rows
+        # for row in rows:
+        #     row = (row)
+        print(rows)
+        #     self.listWidget.itemClicked(f'{row}')
+        # con.close()        
 
 
     @pyqtSlot(str) 
