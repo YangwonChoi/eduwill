@@ -4,6 +4,7 @@ from PyQt5 import uic
 from PyQt5 import QtCore
 from PyQt5.QtCore import QThread, pyqtSlot
 from socket import *
+from PyQt5.QtGui import *
 
 form_main = uic.loadUiType("professor.ui")[0]
 
@@ -26,7 +27,7 @@ class SocketClient(QThread):  # 서버와 클라이언트 그리고 서버에서
             data = self.cnn.recv(1024)
             data = data.decode()
 
-            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@list_q') or data.startswith('@invite'):
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@list_q') or data.startswith('@invite') or data.startswith("@QnA"):
                 self.add_user.emit(data) #구동클래스에 데이터 전달
                 print("커멘드메세지",data)
 
@@ -74,7 +75,7 @@ class Professor_Window(QMainWindow, form_main):
         self.surv_radiobtn.clicked.connect(lambda :self.radio_check(self.surv_radiobtn.text()))
         self.land_radiobtn.clicked.connect(lambda :self.radio_check(self.land_radiobtn.text()))
         self.char_radiobtn.clicked.connect(lambda :self.radio_check(self.char_radiobtn.text()))
-        self.backback_btn.clicked.connect(self.hide)
+        self.backback_btn.clicked.connect(self.hide_)
         self.send_btn.clicked.connect(self.send_serv)
         self.send_btn_2.clicked.connect(self.send_chat_msg)
         self.qa_btn.clicked.connect(self.send_qna)
@@ -82,6 +83,7 @@ class Professor_Window(QMainWindow, form_main):
         self.qn_anser_btn.clicked.connect(self.answer_qna)
         self.anser_back.clicked.connect(self.answer_back)
         self.anser_btn2.clicked.connect(self.qna_serv)
+        self.tableWidget.cellClicked.connect(lambda :self.qn_anser_btn.setDisabled(False))
 
 
     def initUI(self):
@@ -90,6 +92,64 @@ class Professor_Window(QMainWindow, form_main):
         self.sign_pw_2.setEchoMode(QLineEdit.Password)
         self.login_pw.setEchoMode(QLineEdit.Password)
         self.listWidget_2.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch) #문제풀기 기능에서 테이블위젯의 컬럼의 비율
+        # self.tableWidget.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch) #문제풀기 기능에서 테이블위젯의 컬럼의 비율
+        # ----------------------------------------------------------------------
+        palette = QPalette()
+        palette.setBrush(QPalette.Background, QBrush(QPixmap("dino.png")))
+        self.setPalette(palette)
+        self.learn_btn.setStyleSheet("""
+        QPushButton {
+        color: rgb(68, 255, 0);
+            background-image : url(ss.png); 
+        }
+        QPushButton:hover {
+            background-image : url(ssdd.png);
+        }
+        QPushButton:pressed{
+background-image : url(ssdds.png);}
+
+    """)
+        self.quiz_btn.setStyleSheet("""
+                QPushButton {
+                color: rgb(68, 255, 0);
+                    background-image : url(ss.png); 
+                }
+                QPushButton:hover {
+                    background-image : url(ssdd.png);
+                }
+                QPushButton:pressed{
+        background-image : url(ssdds.png);}
+
+            """)
+        self.qa_btn.setStyleSheet("""
+                QPushButton {
+                color: rgb(68, 255, 0);
+                    background-image : url(ss.png); 
+                }
+                QPushButton:hover {
+                    background-image : url(ssdd.png);
+                }
+                QPushButton:pressed{
+        background-image : url(ssdds.png);}
+
+            """)
+        self.chat_btn.setStyleSheet("""
+                QPushButton {
+                    color: rgb(68, 255, 0);
+                    background-image : url(ss.png); 
+                }
+                QPushButton:hover {
+                    background-image : url(ssdd.png);
+                }
+                QPushButton:pressed{
+        background-image : url(ssdds.png);}
+
+            """)
+        # ---------------------------------------------------------------------
+        self.tableWidget.setColumnWidth(0,590)#컬럼 크기맞추기
+        self.tableWidget.setColumnWidth(2,150)
+        self.tableWidget.setColumnWidth(3,150)
+        self.tableWidget.setColumnWidth(1,146)
 
     def sign_up(self): # 회원가입 버튼 누를때 서버에 상황전달
         self.t1.send("@sign_up")
@@ -211,6 +271,20 @@ class Professor_Window(QMainWindow, form_main):
                 else:
                     self.t1.send('@invite NO')
 
+        elif msg.startswith('@QnA'):
+            msg = msg.replace('@QnA ', '', 1)
+
+            for i in msg.split('@QnA '):
+                if i == "done" or i == "empty":
+                    break
+
+                self.tableWidget.setRowCount(int(i.split('/')[0])) # 문제 갯수대로 열생성
+                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 0, QTableWidgetItem(i.split("/")[1]))
+                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 3, QTableWidgetItem(i.split("/")[2]))
+                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 1, QTableWidgetItem(i.split("/")[3]))
+                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 2, QTableWidgetItem(i.split("/")[4]))
+
+
 
     def closeEvent(self, event):
         self.t1.send("@exit")
@@ -258,7 +332,7 @@ class Professor_Window(QMainWindow, form_main):
         self.quiz_widget.hide()
         self.menu_widget.show()
 
-    def hide(self): #back버튼 누를시 제출한 내용 보여주기
+    def hide_(self): #back버튼 누를시 출제한 내용 보여주기
         self.make_widget.hide()
         radio = [self.surv_radiobtn, self.land_radiobtn, self.char_radiobtn]
         for i in radio:
@@ -270,31 +344,46 @@ class Professor_Window(QMainWindow, form_main):
 
 
     def send_qna(self):
+        self.menu_widget.hide()
+        self.qn_anser_btn.setDisabled(True)
         self.qn_widget.show()
-        self.t1.send("@Q&A")
+        self.t1.send("@QnA")
+
 
 
 
     def qna_back(self):
         self.qn_widget.hide()
         self.menu_widget.show()
+        self.t1.send("@exit")
+
 
 
 
     def answer_qna(self):
         self.anser_widget.show()
         self.qn_widget.hide()
+        self.menu_widget.hide()
+
+        for i in self.tableWidget.selectedIndexes():
+            self.num = i.row()
+            break
+        self.Questions_label.setText(self.tableWidget.item(self.num,0).text())
 
 
 
     def answer_back(self):
         self.anser_widget.hide()
+        self.textEdit.clear()
         self.qn_widget.show()
+
 
     def qna_serv(self):
         qna_answer = self.textEdit.toPlainText()
-        self.t1.send(f'@Q&A/{qna_answer}')
+        self.t1.send(f'{self.num+1}/{qna_answer}')
         self.textEdit.clear()
+        self.anser_widget.hide()
+        self.qn_widget.show()
 
 
 

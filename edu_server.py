@@ -143,7 +143,7 @@ def QnA_ctrl_func(clnt_num):
     con, c = get_DBcursor()
     type = clnt_imfor[clnt_num][2]
     if type == 'stu':
-        c.execute('SELECT * FROM QnATBL WHERE ID=?', (clnt_imfor[clnt_num][1],))
+        c.execute('SELECT * FROM QnATBL')
         rows = c.fetchall()
         if not c:  #등록된 질문 없을 시 X send
             send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA empty')
@@ -186,7 +186,15 @@ def QnA_ctrl_func(clnt_num):
             else:
                 answer = msg.split('/')
                 num = int(answer[0])
-                c.execute('UPDATE QnATBL SET Answer=? WHERE No=?', (num, answer[1]))
+                c.execute('UPDATE QnATBL SET Answer=? WHERE No=?', (answer[1], num))
+                c.execute('SELECT * FROM QnATBL')
+                rows = c.fetchall()
+                for row in rows:
+                    row = list(row)
+                    row[0] = str(row[0])
+                    row = '/'.join(row)
+                    send_clnt_msg(clnt_imfor[clnt_num][0], ('@QnA ' + row))
+                send_clnt_msg(clnt_imfor[clnt_num][0], '@QnA done')
                 con.commit()
     else:
         print('type error in QA')
