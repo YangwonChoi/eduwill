@@ -4,20 +4,27 @@ from PyQt5 import uic
 from PyQt5 import QtCore
 from PyQt5.QtCore import QThread, pyqtSlot
 from socket import *
+import sqlite3
+
 
 form_stu = uic.loadUiType("student.ui")[0]
 
+#DB 연결, 커서획득 함수
+def get_DBcursor():
+    con = sqlite3.connect('clntDB')  # DB open
+    c = con.cursor()  # 커서 획득
+    return (con, c)
 
-class SocketClient(QThread):
+class SocketClient(QThread): # Q쓰레드 클래스 선언
     add_chat = QtCore.pyqtSignal(list)  # 나중에 데이터 받을때 슬롯들
     add_user = QtCore.pyqtSignal(str)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None): 
         super().__init__()
         self.main = parent
         self.is_run = False
 
-    def connect_cle(self):
+    def connect_cle(self): #소켓연결
         self.cnn = socket(AF_INET, SOCK_STREAM)
         self.cnn.connect(('localhost', 2090))
         self.is_run = True
@@ -29,8 +36,7 @@ class SocketClient(QThread):
             data = data.decode()
             print(data)
 
-            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith(
-                    '@member') or data.startswith('@chat') or data.startswith('@set_q') or data.startswith('@invite'):
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@set_q') or data.startswith('@invite'):
                 self.add_user.emit(data)
 
     def send(self, msg):
@@ -59,26 +65,34 @@ class Student_Window(QMainWindow, form_stu):
         self.chat_btn.clicked.connect(self.chating)  # 상담리스트 버튼 눌렀을때
         self.conect_btn.clicked.connect(self.connect_chat)  # 상담리스트 연결하기 버튼 눌렀을때
         self.exit_st.clicked.connect(self.connect_exit)  # 상담리스트 종료버튼 눌렀을때
-        self.chat_exit_bt.clicked.connect(self.chat_exit)  # 상담(채팅) 종료버튼 눌렀을때
+        self.chat_exit_bt.clicked.connect(self.chat_exit)  # 상담 종료버튼 눌렀을때
         self.listWidget_2.itemClicked.connect(lambda: self.conect_btn.setDisabled(False))
         self.t1.add_user.connect(self.add_user)
+        self.send_btn.clicked.connect(self.chat_send) # 상담 보내기 버튼 눌렀을때
+        self.learn_btn.clicked.connect(self.lean_title) # 학습 버튼 눌렀을때
+        self.title_btn.clicked.connect(self.lean_dino) # 공룡 버튼 눌렀을때
+        self.lean_exit_btn.clicked.connect(self.lean_exit) # 학습 종료버튼 눌렀을때
+        self.listWidget.itemClicked.connect(self.item_clicked)
 
     def initUI(self):
         self.setupUi(self)
         self.sign_widget.hide()  # 로그인 위젯
         self.menu_widget.hide()  # 메뉴 위젯
         self.learn_widget.hide()  # 학습 위젯
+        self.lean_menu_widget.hide() # 학습주제 위젯
         self.chat_widget.hide()  # 상담 채팅 위젯
         self.select_widget.hide()  # 상담 리스트 위젯
+        self.dino_widget.hide() # 학습 위젯
         self.sign_pw.setEchoMode(QLineEdit.Password)
         self.sign_pw_2.setEchoMode(QLineEdit.Password)
         self.login_pw.setEchoMode(QLineEdit.Password)
+        
 
-    def sign_up(self):  # 로그인 버튼 눌렀을때
+    def sign_up(self):  #회원가입 버튼 눌렀을때
         self.t1.send("@sign_up")
         self.sign_widget.show()
 
-    def sign_up_exit(self):  # 취소버튼 눌럿을떄
+    def sign_up_exit(self):  #회원가입 취소버튼 눌럿을떄
         self.t1.send('@exit')
         self.sign_id.setDisabled(False)
         self.idcheck_btn.setDisabled(False)
@@ -99,7 +113,6 @@ class Student_Window(QMainWindow, form_stu):
             sign_check = False
         if not self.id_check:
             sign_check = False
-
         if not sign_check:
             QMessageBox.about(self, '경고', '잘못된 양식 입니다')
         else:
@@ -113,23 +126,80 @@ class Student_Window(QMainWindow, form_stu):
     def login(self):  # 로그인 버튼 눌럿을때
         self.t1.send(f"@log_in/{self.login_id.text()}/{self.login_pw.text()}")
 
-    def chating(self):  # 상담버튼 눌렀을때
+    def chating(self): #상담버튼 눌렀을때
         self.menu_widget.hide()
         self.t1.send("@member")
         self.select_widget.show()
         self.conect_btn.setDisabled(True)
 
-    def connect_exit(self):  # 상담리스트 종료버튼 눌렀을때
+    def connect_exit(self): # 상담리스트 종료버튼 눌렀을때
         self.t1.send("@exit")
         self.select_widget.hide()
         self.menu_widget.show()
 
-    def chat_exit(self):  # 상담 종료버튼 눌렀을때
+    def chat_exit(self): # 상담 종료버튼 눌렀을때
         self.t1.send("@exit")
         self.chat_widget.hide()
         self.select_widget.show()
 
-    @pyqtSlot(str)
+    def chat_send(self): #상담 보내기버튼 눌렀을때
+        self.t1.send(f"@chat {self.chat_input.text()}")
+        self.chat_input.clear()
+
+    def lean_title(self):
+        self.menu_widget.hide()
+        self.learn_widget.show()
+        self.lean_menu_widget.show()
+        print("주제선택")
+
+    def lean_dino(self):
+        self.lean_menu_widget.hide()
+        self.dino_widget.show()
+        con, c = get_DBcursor()
+        c.execute("SELECT 한글명 FROM study")
+        rows = c.fetchall()
+        rows = list(rows)
+        for row in rows:
+            row = list(row)
+            self.listWidget.addItem(f'{row[0]}')
+        con.close()
+        print("학습창")
+
+    def lean_exit(self):
+        self.learn_widget.hide()
+        self.dino_widget.hide()
+        self.menu_widget.show()
+        print("학습종료")
+
+
+
+    def item_clicked(self):
+
+        con, c = get_DBcursor()
+        c.execute("SELECT * FROM study where 한글명 = ?", (self.listWidget.currentItem().text(),))
+        rows = c.fetchone()
+        rows =list(rows)
+        self.dino_num.setText(rows[0])
+        self.kor_name.setText(rows[1])
+        self.eng_name.setText(rows[2])
+        self.dino_t.setText(rows[3])
+        self.dino_f.setText(rows[4])
+        self.dino_w.setText(rows[5])
+        self.dino_d.setText(rows[6])
+        self.dino_a.setText(rows[7])
+        self.dino_type.setText(rows[9])
+        self.dino_info.setText(rows[8])
+
+
+
+
+
+
+
+
+
+
+    @pyqtSlot(str) 
     def add_user(self, msg):
         if msg.startswith('@sign_up'):
             msg = msg.replace('@sign_up ', '', 1)
@@ -173,18 +243,14 @@ class Student_Window(QMainWindow, form_stu):
                 buttonReply = QMessageBox.information(self, '채팅요청', "상담요청이 왔습니다.", QMessageBox.Yes | QMessageBox.No)
                 if buttonReply == QMessageBox.Yes:
                     self.t1.send('@invite OK')
-                    self.chat_bro.clear()
-                    self.menu_widget.hide()
                     self.chat_widget.show()
-                else:
-                    self.t1.send('@invite NO')
 
-
-    def connect_chat(self):  # 상담 연결하기 버튼 눌렀을때
+    def connect_chat(self): # 상담 연결하기 버튼 눌렀을때
         self.chat_bro.clear()
         self.select_widget.hide()
         self.chat_widget.show()
         self.t1.send(f"@chat/{self.listWidget_2.currentItem().text()}")
+        print(self.listWidget_2.currentItem().text())
 
 
 if __name__ == "__main__":
