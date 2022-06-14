@@ -163,6 +163,8 @@ def QnA_ctrl_func(clnt_num):
                 msg = msg.split('/')
                 c.executemany('INSERT INTO QnATBL(ID, Date, Question) VALUES(?, ?, ?)', (msg,))
                 con.commit()
+                c.execute('SELECT * FROM QnATBL')
+                rows = c.fetchall()
                 for row in rows:
                     row = list(row)
                     row[0] = str(row[0])

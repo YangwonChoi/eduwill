@@ -6,6 +6,7 @@ from PyQt5.QtCore import QThread, pyqtSlot
 from socket import *
 import sqlite3
 import datetime
+from PyQt5.QtGui import *
 
 
 form_stu = uic.loadUiType("student.ui")[0]
@@ -37,7 +38,7 @@ class SocketClient(QThread): # Q쓰레드 클래스 선언
             data = data.decode()
             print(data)
 
-            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@set_q') or data.startswith('@invite'):
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@set_q') or data.startswith('@invite') or data.startswith("@QnA"):
                 self.add_user.emit(data)
 
     def send(self, msg):
@@ -100,6 +101,59 @@ class Student_Window(QMainWindow, form_stu):
         self.tableWidget.setColumnWidth(2, 150)
         self.tableWidget.setColumnWidth(3, 150)
         self.tableWidget.setColumnWidth(1, 146)
+
+        palette = QPalette()
+        palette.setBrush(QPalette.Background, QBrush(QPixmap("dino.png")))
+        self.setPalette(palette)
+        self.learn_btn.setStyleSheet("""
+                QPushButton {
+                color: rgb(68, 255, 0);
+                    background-image : url(ss.png); 
+                }
+                QPushButton:hover {
+                    background-image : url(ssdd.png);
+                }
+                QPushButton:pressed{
+        background-image : url(ssdds.png);}
+
+            """)
+        self.quiz_btn.setStyleSheet("""
+                        QPushButton {
+                        color: rgb(68, 255, 0);
+                            background-image : url(ss.png); 
+                        }
+                        QPushButton:hover {
+                            background-image : url(ssdd.png);
+                        }
+                        QPushButton:pressed{
+                background-image : url(ssdds.png);}
+
+                    """)
+        self.qa_btn.setStyleSheet("""
+                        QPushButton {
+                        color: rgb(68, 255, 0);
+                            background-image : url(ss.png); 
+                        }
+                        QPushButton:hover {
+                            background-image : url(ssdd.png);
+                        }
+                        QPushButton:pressed{
+                background-image : url(ssdds.png);}
+
+                    """)
+        self.chat_btn.setStyleSheet("""
+                        QPushButton {
+                            color: rgb(68, 255, 0);
+                            background-image : url(ss.png); 
+                        }
+                        QPushButton:hover {
+                            background-image : url(ssdd.png);
+                        }
+                        QPushButton:pressed{
+                background-image : url(ssdds.png);}
+
+                    """)
+        # ---------------------------------------------------------------------
         
 
     def sign_up(self):  #회원가입 버튼 눌렀을때
@@ -139,6 +193,7 @@ class Student_Window(QMainWindow, form_stu):
 
     def login(self):  # 로그인 버튼 눌럿을때
         self.t1.send(f"@log_in/{self.login_id.text()}/{self.login_pw.text()}")
+        self.ID = self.login_id.text()
 
     def chating(self): #상담버튼 눌렀을때
         self.menu_widget.hide()
@@ -249,6 +304,18 @@ class Student_Window(QMainWindow, form_stu):
                 if buttonReply == QMessageBox.Yes:
                     self.t1.send('@invite OK')
                     self.chat_widget.show()
+        elif msg.startswith('@QnA'):
+            msg = msg.replace('@QnA ', '', 1)
+
+            for i in msg.split('@QnA '):
+                if i == "done" or i == "empty":
+                    break
+
+                self.tableWidget.setRowCount(int(i.split('/')[0]))  # 문제 갯수대로 열생성
+                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 0, QTableWidgetItem(i.split("/")[3]))
+                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 3, QTableWidgetItem(i.split("/")[2]))
+                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 1, QTableWidgetItem(i.split("/")[1]))
+                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 2, QTableWidgetItem(i.split("/")[4]))
 
     def connect_chat(self): # 상담 연결하기 버튼 눌렀을때
         self.chat_bro.clear()
@@ -276,9 +343,9 @@ class Student_Window(QMainWindow, form_stu):
         self.widget_2.hide()
         self.lineEdit.clear()
         self.qn_widget.show()
-    def q_a_reg(self):
-        # self.t1.send(f"{}")
 
+    def q_a_reg(self):
+        self.t1.send(f"{self.login_id.text()}/{datetime.datetime.now().date()}/{self.lineEdit.text()}")
         self.widget_2.hide()
         self.lineEdit.clear()
         self.qn_widget.show()
