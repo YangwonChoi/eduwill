@@ -338,7 +338,7 @@ border-radius: 5px}
       <string notr="true">color: rgb(186, 189, 182);</string>
      </property>
      <property name="text">
-      <string>Quiz 분석 문제들의 오답율 그래프화 기능</string>
+      <string>통계: 문제들의 오답율 그래프화 기능</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_19">
@@ -812,14 +812,13 @@ background-color: rgb(49, 48, 48);
           <bool>false</bool>
          </property>
          <property name="styleSheet">
-          <string notr="true">
-</string>
+          <string notr="true"/>
          </property>
          <property name="inputMethodHints">
           <set>Qt::ImhNone</set>
          </property>
          <property name="text">
-          <string>분석</string>
+          <string>통계</string>
          </property>
          <property name="autoRepeat">
           <bool>false</bool>
@@ -1602,7 +1601,8 @@ border-radius: 15px}
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(238, 238, 236);</string>
+     <string notr="true">
+background-color: rgb(85, 87, 83);</string>
     </property>
     <widget class="QTableWidget" name="tableWidget">
      <property name="geometry">
@@ -1612,6 +1612,9 @@ border-radius: 15px}
        <width>1051</width>
        <height>321</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(255, 255, 255);</string>
      </property>
      <column>
       <property name="text">
@@ -1628,6 +1631,11 @@ border-radius: 15px}
        <string>답변여부</string>
       </property>
      </column>
+     <column>
+      <property name="text">
+       <string>날짜</string>
+      </property>
+     </column>
     </widget>
     <widget class="QLabel" name="label_14">
      <property name="geometry">
@@ -1640,8 +1648,15 @@ border-radius: 15px}
      </property>
      <property name="font">
       <font>
+       <family>Ubuntu Condensed</family>
        <pointsize>21</pointsize>
+       <weight>75</weight>
+       <italic>true</italic>
+       <bold>true</bold>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(101, 255, 240);</string>
      </property>
      <property name="text">
       <string>Q&amp;A 게시판</string>
@@ -1656,6 +1671,23 @@ border-radius: 15px}
        <height>31</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton{
+background-color: rgb(136, 138, 133);
+border-style: solid;
+border-radius: 5px
+}
+QPushButton:hover{
+background-color: rgb(180, 255, 255);
+border-style: solid;
+border-radius: 5px}
+
+QPushButton:pressed{
+background-color: rgb(100, 255, 255);
+border-style: solid;
+border-radius: 5px}
+</string>
+     </property>
      <property name="text">
       <string>back</string>
      </property>
@@ -1669,6 +1701,23 @@ border-radius: 15px}
        <height>31</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton{
+background-color: rgb(136, 138, 133);
+border-style: solid;
+border-radius: 5px
+}
+QPushButton:hover{
+background-color: rgb(180, 255, 255);
+border-style: solid;
+border-radius: 5px}
+
+QPushButton:pressed{
+background-color: rgb(100, 255, 255);
+border-style: solid;
+border-radius: 5px}
+</string>
+     </property>
      <property name="text">
       <string>답변하기</string>
      </property>
@@ -1677,14 +1726,15 @@ border-radius: 15px}
    <widget class="QWidget" name="anser_widget" native="true">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>70</y>
-      <width>1091</width>
-      <height>511</height>
+      <x>300</x>
+      <y>150</y>
+      <width>550</width>
+      <height>200</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(238, 238, 236);</string>
+     <string notr="true">
+background-color: rgb(85, 87, 83);</string>
     </property>
     <widget class="QLabel" name="Questions_label">
      <property name="geometry">
@@ -1697,8 +1747,15 @@ border-radius: 15px}
      </property>
      <property name="font">
       <font>
+       <family>Ubuntu Condensed</family>
        <pointsize>15</pointsize>
+       <weight>75</weight>
+       <italic>true</italic>
+       <bold>true</bold>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(101, 255, 240);</string>
      </property>
      <property name="text">
       <string>제목</string>
@@ -1707,52 +1764,157 @@ border-radius: 15px}
     <widget class="QPushButton" name="anser_back">
      <property name="geometry">
       <rect>
-       <x>310</x>
-       <y>440</y>
+       <x>240</x>
+       <y>130</y>
        <width>121</width>
        <height>31</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton{
+background-color: rgb(136, 138, 133);
+border-style: solid;
+border-radius: 5px
+}
+QPushButton:hover{
+background-color: rgb(180, 255, 255);
+border-style: solid;
+border-radius: 5px}
+
+QPushButton:pressed{
+background-color: rgb(100, 255, 255);
+border-style: solid;
+border-radius: 5px}
+</string>
      </property>
      <property name="text">
       <string>back</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="anser_btn2">
+    <widget class="QLineEdit" name="textEdit">
      <property name="geometry">
       <rect>
-       <x>550</x>
-       <y>440</y>
-       <width>121</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>답변하기</string>
-     </property>
-    </widget>
-    <widget class="QTextEdit" name="textEdit">
-     <property name="geometry">
-      <rect>
-       <x>40</x>
+       <x>70</x>
        <y>90</y>
-       <width>1011</width>
-       <height>321</height>
+       <width>431</width>
+       <height>25</height>
       </rect>
      </property>
      <property name="styleSheet">
       <string notr="true">background-color: rgb(255, 255, 255);</string>
      </property>
     </widget>
+    <widget class="QLabel" name="label_27">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>90</y>
+       <width>41</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(101, 255, 240);</string>
+     </property>
+     <property name="text">
+      <string>답변:</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="anser_btn2">
+     <property name="geometry">
+      <rect>
+       <x>380</x>
+       <y>130</y>
+       <width>121</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QPushButton{
+background-color: rgb(136, 138, 133);
+border-style: solid;
+border-radius: 5px
+}
+QPushButton:hover{
+background-color: rgb(180, 255, 255);
+border-style: solid;
+border-radius: 5px}
+
+QPushButton:pressed{
+background-color: rgb(100, 255, 255);
+border-style: solid;
+border-radius: 5px}
+</string>
+     </property>
+     <property name="text">
+      <string>답변하기</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="statistics_widget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>70</y>
+      <width>1091</width>
+      <height>511</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(238, 238, 236);</string>
+    </property>
+    <widget class="QLabel" name="label_26">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>20</y>
+       <width>231</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>20</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>문제 별 통계</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton">
+     <property name="geometry">
+      <rect>
+       <x>50</x>
+       <y>460</y>
+       <width>89</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>back</string>
+     </property>
+    </widget>
+    <widget class="QWidget" name="grp_widget" native="true">
+     <property name="geometry">
+      <rect>
+       <x>50</x>
+       <y>90</y>
+       <width>991</width>
+       <height>321</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
    <zorder>select_widget</zorder>
-   <zorder>quiz_widget</zorder>
    <zorder>chat_widget</zorder>
-   <zorder>make_widget</zorder>
-   <zorder>anser_widget</zorder>
-   <zorder>qn_widget</zorder>
    <zorder>sign_widget</zorder>
    <zorder>login_widget</zorder>
    <zorder>menu_widget</zorder>
+   <zorder>statistics_widget</zorder>
+   <zorder>qn_widget</zorder>
+   <zorder>quiz_widget</zorder>
+   <zorder>make_widget</zorder>
+   <zorder>anser_widget</zorder>
   </widget>
  </widget>
  <resources/>

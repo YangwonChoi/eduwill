@@ -5,6 +5,11 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QThread, pyqtSlot
 from socket import *
 from PyQt5.QtGui import *
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+
+
 
 form_main = uic.loadUiType("professor.ui")[0]
 
@@ -27,7 +32,7 @@ class SocketClient(QThread):  # 서버와 클라이언트 그리고 서버에서
             data = self.cnn.recv(1024)
             data = data.decode()
 
-            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@list_q') or data.startswith('@invite') or data.startswith("@QnA"):
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@list_q') or data.startswith('@invite') or data.startswith("@QnA") or data.startswith('@graph'):
                 self.add_user.emit(data) #구동클래스에 데이터 전달
                 print("커멘드메세지",data)
 
@@ -50,6 +55,7 @@ class Professor_Window(QMainWindow, form_main):
         self.chat_widget.hide()
         self.quiz_widget.hide()
         self.make_widget.hide()
+        self.statistics_widget.hide()
         self.sign_widget.hide()
         self.qn_widget.hide()
         self.anser_widget.hide()
@@ -84,6 +90,9 @@ class Professor_Window(QMainWindow, form_main):
         self.anser_back.clicked.connect(self.answer_back)
         self.anser_btn2.clicked.connect(self.qna_serv)
         self.tableWidget.cellClicked.connect(lambda :self.qn_anser_btn.setDisabled(False))
+        self.learn_btn.clicked.connect(self.graph)
+        self.pushButton.clicked.connect(self.graph_back)
+
 
 
     def initUI(self):
@@ -203,7 +212,6 @@ background-image : url(ssdds.png);}
         self.select_widget.show()
 
     def connect_exit(self):
-        self.t1.send("@exit")
         self.select_widget.hide()
         self.chat_widget.hide()
         self.menu_widget.show()
@@ -279,11 +287,18 @@ background-image : url(ssdds.png);}
                     break
 
                 self.tableWidget.setRowCount(int(i.split('/')[0])) # 문제 갯수대로 열생성
-                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 0, QTableWidgetItem(i.split("/")[1]))
+                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 0, QTableWidgetItem(i.split("/")[3]))
                 self.tableWidget.setItem(int(i.split('/')[0]) - 1, 3, QTableWidgetItem(i.split("/")[2]))
-                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 1, QTableWidgetItem(i.split("/")[3]))
+                self.tableWidget.setItem(int(i.split('/')[0]) - 1, 1, QTableWidgetItem(i.split("/")[1]))
                 self.tableWidget.setItem(int(i.split('/')[0]) - 1, 2, QTableWidgetItem(i.split("/")[4]))
 
+        elif msg.startswith('@graph'):
+            msg = msg.replace('@graph ','', 1)
+
+            for i in msg.split('@graph '):
+                if i == "done" or i == "empty":
+                    break
+                print("확인",i)
 
 
     def closeEvent(self, event):
@@ -326,6 +341,7 @@ background-image : url(ssdds.png);}
         self.t1.send(f"@list_q/{a}")
 
     def send_quiz(self):
+        self.quiz_widget.hide()
         self.make_widget.show()
 
     def quiz_back(self):
@@ -341,6 +357,7 @@ background-image : url(ssdds.png);}
                 break
 
         self.t1.send(f"@list_q/{table}")
+        self.quiz_widget.show()
 
 
     def send_qna(self):
@@ -379,11 +396,35 @@ background-image : url(ssdds.png);}
 
 
     def qna_serv(self):
-        qna_answer = self.textEdit.toPlainText()
+        qna_answer = self.textEdit.text()
         self.t1.send(f'{self.num+1}/{qna_answer}')
         self.textEdit.clear()
         self.anser_widget.hide()
         self.qn_widget.show()
+
+
+    def graph(self):
+        self.menu_widget.hide()
+        self.statistics_widget.show()
+        self.t1.send('@graph')
+
+        # self.fig = plt.figure()
+        # self.canvas = FigureCanvasQTAgg(self.fig)
+        # self.grp_widget.addWidget(self.canvas)
+        dic = {"student1": 85, "student2": 90, "student3": 70, "student4": 80}
+
+        plt.bar(dic.keys(), dic.values(), color="pink", width=0.4)
+        plt.xlabel("name")
+        plt.ylabel("score")
+        plt.show()
+
+
+
+
+    def graph_back(self):
+        self.statistics_widget.hide()
+        self.menu_widget.show()
+
 
 
 

@@ -378,29 +378,33 @@ def send_list(clnt_num):
 
 def send_result(clnt_num):
     con, c = get_DBcursor()
+    send_data = {}
     c.execute('SELECT Name FROM studentTBL')
     rows = c.fetchall()
     if not rows:
         send_clnt_msg(clnt_imfor[clnt_num][0], '@graph empty')
+        con.close()
+        return
     else:
-        rows = '/'.join(rows)
-        send_clnt_msg(clnt_imfor[clnt_num][0], ('@graph ' + rows))
+        data = '/'.join(map(str, rows))
+        print(data)
+        send_clnt_msg(clnt_imfor[clnt_num][0], ('@graph ' + data))
         while True:
             msg = recv_clnt_msg(clnt_imfor[clnt_num][0])
             if msg == '@exit':
                 con.close()
                 return
             else:
-                c.execute('SELECT * FROM historyTBL WHERE ID = (SELECT ID FROM studentTBL WHERE Name = ?)', (msg,))
+                c.execute('SELECT Subject, Score FROM historyTBL WHERE ID = (SELECT ID FROM studentTBL WHERE Name = ?)', (msg,))
                 rows = c.fetchall()
                 if not rows:
                     send_clnt_msg(clnt_imfor[clnt_num][0], '@graph empty')
                 else:
                     for row in rows:
                         row = list(row)
-                        row[4] = str(row[4])
-                        data = '/'.join(row)
-                        send_clnt_msg(clnt_imfor[clnt_num][0], ('@graph ' + data))
+                        send_data[row[0]] = row[1]
+                    data = str(send_data)
+                    send_clnt_msg(clnt_imfor[clnt_num][0], ('@graph ' + data))
                     send_clnt_msg(clnt_imfor[clnt_num][0], '@graph done')
             
     
