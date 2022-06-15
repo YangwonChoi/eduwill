@@ -92,7 +92,9 @@ class Professor_Window(QMainWindow, form_main):
         self.tableWidget.cellClicked.connect(lambda :self.qn_anser_btn.setDisabled(False))
         self.learn_btn.clicked.connect(self.graph)
         self.pushButton.clicked.connect(self.graph_back)
-
+        self.surButton.clicked.connect(lambda: self.radio_check2(self.surButton.text()))
+        self.findButton.clicked.connect(lambda: self.radio_check2(self.findButton.text()))
+        self.chaButton.clicked.connect(lambda: self.radio_check2(self.chaButton.text()))
 
 
     def initUI(self):
@@ -293,12 +295,12 @@ background-image : url(ssdds.png);}
                 self.tableWidget.setItem(int(i.split('/')[0]) - 1, 2, QTableWidgetItem(i.split("/")[4]))
 
         elif msg.startswith('@graph'):
-            msg = msg.replace('@graph ','', 1)
+            msg = msg.replace('@graph ', '', 1)
 
-            for i in msg.split('@graph '):
+            for i in msg:
                 if i == "done" or i == "empty":
                     break
-                print("확인",i)
+                print(msg)
 
 
     def closeEvent(self, event):
@@ -406,17 +408,26 @@ background-image : url(ssdds.png);}
     def graph(self):
         self.menu_widget.hide()
         self.statistics_widget.show()
-        self.t1.send('@graph')
+        self.btn = [self.surButton, self.findButton, self.chaButton]
+        for i in self.btn:
+            if i.isChecked():
+                self.table = i.text()
+                print(self.table)
+        self.t1.send(f'@graph/{self.table}')
+
 
         # self.fig = plt.figure()
         # self.canvas = FigureCanvasQTAgg(self.fig)
         # self.grp_widget.addWidget(self.canvas)
-        dic = {"student1": 85, "student2": 90, "student3": 70, "student4": 80}
+        # dic = {"student1": 85, "student2": 90, "student3": 70, "student4": 80}
+        #
+        # plt.bar(dic.keys(), dic.values(), color="pink", width=0.4)
+        # plt.xlabel("name")
+        # plt.ylabel("score")
+        # plt.show()
 
-        plt.bar(dic.keys(), dic.values(), color="pink", width=0.4)
-        plt.xlabel("name")
-        plt.ylabel("score")
-        plt.show()
+    def radio_check2(self, sub):
+        self.t1.send(f'@graph/{sub}')
 
 
 
@@ -434,3 +445,4 @@ if __name__ == "__main__":
     win = Professor_Window()
     win.setWindowTitle('교수')
     sys.exit(app.exec())
+

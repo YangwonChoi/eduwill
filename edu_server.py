@@ -378,10 +378,9 @@ def send_list(clnt_num):
 
 def send_result(clnt_num, sub):
     con, c = get_DBcursor()
-    # sub = sub.split('/')
-    # sub.remove('graph')
-    #c.execute('SELECT * FROM quizTBL WHERE Subject=?', (sub[0], ))
-    c.execute('SELECT * FROM quizTBL')
+    sub = sub.split('/')
+    c.execute('SELECT * FROM quizTBL WHERE Subject=?', (sub[1],))
+    #c.execute('SELECT * FROM quizTBL')
     rows = c.fetchall()
     if not rows:
         send_clnt_msg(clnt_imfor[clnt_num][0], '@graph empty')
@@ -403,8 +402,8 @@ def send_result(clnt_num, sub):
             send_data = '/'.join(data)
             send_clnt_msg(clnt_imfor[clnt_num][0], ('@graph ' + send_data))
         send_clnt_msg(clnt_imfor[clnt_num][0], '@graph done')
-    con.close()
-    return
+        con.close()
+        return
             
     
 
@@ -424,7 +423,7 @@ def call_func(clnt_num, instruction):
         send_list(clnt_num)
     elif instruction.startswith('set_q'):
         set_question(clnt_num, instruction)
-    elif instruction == 'graph':
+    elif instruction.startswith('graph'):
         send_result(clnt_num, instruction)
     else:
         return
