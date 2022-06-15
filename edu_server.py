@@ -376,6 +376,24 @@ def send_list(clnt_num):
     return
 
 
+def send_result(clnt_num):
+    con, c = get_DBcursor()
+    c.execute('SELECT * FROM historyTBL')
+    rows = c.fetchall()
+    if not rows:
+        send_clnt_msg(clnt_imfor[clnt_num][0], '@graph empty')
+    else:
+        for row in rows:
+            row = list(row)
+            row[4] = str(row[4])
+            data = '/'.join(row)
+            send_clnt_msg(clnt_imfor[clnt_num][0], ('@graph ' + data))
+        send_clnt_msg(clnt_imfor[clnt_num][0], '@graph done')
+    con.close()
+    return
+
+    
+
 #상황에 맞는 함수 호출해주는 함수
 def call_func(clnt_num, instruction):
     if instruction == 'sign_up':
@@ -392,6 +410,8 @@ def call_func(clnt_num, instruction):
         send_list(clnt_num)
     elif instruction.startswith('set_q'):
         set_question(clnt_num, instruction)
+    elif instruction == 'graph':
+        send_result(clnt_num)
     else:
         return
 
