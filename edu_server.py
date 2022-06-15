@@ -231,6 +231,29 @@ def send_questions(clnt_num, question):  # 문제출제 함수
             row = '/'.join(row)
             send_clnt_msg(clnt_imfor[clnt_num][0], ('@list_q ' + row))
     send_clnt_msg(clnt_imfor[clnt_num][0], '@list_q done')  #다 보내면 done 송신
+    if clnt_imfor[clnt_num][2] == 'stu':
+        msg = recv_clnt_msg(clnt_imfor[clnt_num][0])
+        print(msg)
+        if msg == 'exit':
+            con.close()
+            return
+        else:
+            hst_data = msg.split('/')
+            hst_data[3] = int(hst_data[3])
+            print(hst_data)
+            c.executemany("INSERT INTO historyTBL(ID, Subject, Data, Score) VALUES(?, ?, ?, ?)", (hst_data,))
+            con.commit()
+            quiz_data = eval(hst_data[2])
+            for k in quiz_data:
+                c.execute('SELECT Solving_count, Correct_count FROM quizTBL WHERE No=?', (k,))
+                row = c.fetchone()
+                row = list(row)
+                row[0] += 1
+                if quiz_data[k] == 1:
+                    row[1] += 1
+                c.execute('UPDATE quizTBL SET Solving_count=?, Correct_count=? WHERE No=?',(row[0], row[1], k))
+                con.commit()
+                
     con.close()
     return
 
