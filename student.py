@@ -88,9 +88,9 @@ class Student_Window(QMainWindow, form_stu):
         self.pushButton_2.clicked.connect(self.discovery)  #과목선택창 발견지대륙 버튼 눌렀을때
         self.pushButton_3.clicked.connect(self.character)  #과목선택창 특징 버튼 눌렀을때
         self.pushButton_6.clicked.connect(self.quiz_exit)  # 퀴즈 저장/종료 버튼 눌렀을때
-        self.listWidget_5.itemClicked.connect(self.quiz_clicked)
-        self.save_bt.clicked.connect(self.save_result)
-        self.get_point_bt.clicked.connect(self.get_points)
+        self.listWidget_5.itemClicked.connect(self.quiz_clicked) # 퀴즈 문제목록창 눌렀을때
+        self.save_bt.clicked.connect(self.save_result) # 제출 버튼 눌렀을때
+        self.get_point_bt.clicked.connect(self.get_points) # 채점하기 버튼 눌렀을때
 
 
     def initUI(self):
@@ -276,15 +276,16 @@ class Student_Window(QMainWindow, form_stu):
         self.quiz_widget.show()
 
     def quiz_exit(self):  # 퀴즈 저장/종료 버튼 눌렀을때
+        self.t1.send("@exit")
         self.quiz_widget.hide()
         self.widget.show()
 
-    def quiz_clicked(self):
+    def quiz_clicked(self): # 퀴즈 문제목록 리스트위젯
         self.label_42.setText(self.Qlist[self.listWidget_5.currentRow()].split('/')[2])
         self.lineEdit_2.clear()
      
 
-    def save_result(self):
+    def save_result(self): #제출 버튼 눌렀을때
         self.get_point_bt.setDisabled(False)
         if self.listWidget_5.currentRow() != -1:
             self.result[self.listWidget_5.currentRow()] = self.lineEdit_2.text()
@@ -293,21 +294,21 @@ class Student_Window(QMainWindow, form_stu):
             if i == 0:
                 self.get_point_bt.setDisabled(True)
 
-    def get_points(self):
-        self.sub_q= {}
+    def get_points(self): # 채점 버튼 눌렀을때
+        self.mark= {}
         self.points = 0
         for i,v in enumerate(self.Qlist):
             if self.result[i] == v.split("/")[3]:
                 self.points += 1
-                self.sub_q[int(self.Qlist[i].split("/")[0])] = 1
+                self.mark[int(self.Qlist[i].split("/")[0])] = 1
             else: 
-                self.sub_q[int(self.Qlist[i].split("/")[0])] = 1
+                self.mark[int(self.Qlist[i].split("/")[0])] = 0
         
 
-        QMessageBox.about(self, '채점', f'획득 점수: {self.points}')
-        name = self.Qlist[0].split("/")[1]
-        self.t1.send(f"{self.IDs}/{name}/{self.result}/{self.points}")
-        print(f"{self.IDs}/{name}/{self.sub_q}/{self.points}")
+        QMessageBox.about(self, '채점', f'획득 점수: {self.points}') # 채점결과 메세지박스 실행
+        subject = self.Qlist[0].split("/")[1]
+        self.t1.send(f"{self.IDs}/{subject}/{self.mark}/{self.points}") # ID/과목/결과/점수 서버에 전송
+        print(f"{self.IDs}/{subject}/{self.mark}/{self.points}")
         
         self.point += self.points
         self.result.clear()
@@ -400,27 +401,27 @@ class Student_Window(QMainWindow, form_stu):
         self.t1.send(f"@chat/{self.listWidget_2.currentItem().text()}")
         print(self.listWidget_2.currentItem().text())
 
-    def send_qna(self):
+    def send_qna(self):  # Q&A 버튼 눌렀을때
         self.menu_widget.hide()
         self.qn_widget.show()
         self.t1.send("@QnA")
 
-    def qna_back(self):
+    def qna_back(self): # Q&A back 버튼 눌렀을때
         self.qn_widget.hide()
         self.menu_widget.show()
         self.t1.send("@exit")
 
-    def answer_qna(self):
+    def answer_qna(self): # Q&A 질문하기 버튼 눌렀을때
         self.widget_2.show()
         self.qn_widget.hide()
         self.menu_widget.hide()
 
-    def answer_back(self):
+    def answer_back(self): # 질문등록 back 버튼 눌렀을때
         self.widget_2.hide()
         self.lineEdit.clear()
         self.qn_widget.show()
 
-    def q_a_reg(self):
+    def q_a_reg(self): # 질문등록 등록 버튼 눌렀을때
         self.t1.send(f"{self.login_id.text()}/{datetime.datetime.now().date()}/{self.lineEdit.text()}")
         self.widget_2.hide()
         self.lineEdit.clear()
