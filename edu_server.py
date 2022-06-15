@@ -376,36 +376,32 @@ def send_list(clnt_num):
     return
 
 
-def send_result(clnt_num):
+def send_result(clnt_num, sub):
     con, c = get_DBcursor()
-    send_data = {}
-    c.execute('SELECT Name FROM studentTBL')
+    # sub = sub.split('/')
+    # sub.remove('graph')
+    #c.execute('SELECT * FROM quizTBL WHERE Subject=?', (sub[0], ))
+    c.execute('SELECT * FROM quizTBL')
     rows = c.fetchall()
     if not rows:
         send_clnt_msg(clnt_imfor[clnt_num][0], '@graph empty')
         con.close()
         return
     else:
-        data = '/'.join(map(str, rows))
-        print(data)
-        send_clnt_msg(clnt_imfor[clnt_num][0], ('@graph ' + data))
-        while True:
-            msg = recv_clnt_msg(clnt_imfor[clnt_num][0])
-            if msg == '@exit':
-                con.close()
-                return
-            else:
-                c.execute('SELECT Subject, Score FROM historyTBL WHERE ID = (SELECT ID FROM studentTBL WHERE Name = ?)', (msg,))
-                rows = c.fetchall()
-                if not rows:
-                    send_clnt_msg(clnt_imfor[clnt_num][0], '@graph empty')
-                else:
-                    for row in rows:
-                        row = list(row)
-                        send_data[row[0]] = row[1]
-                    data = str(send_data)
-                    send_clnt_msg(clnt_imfor[clnt_num][0], ('@graph ' + data))
-                    send_clnt_msg(clnt_imfor[clnt_num][0], '@graph done')
+        rows = list(rows)
+        for row in rows:
+            data = list(row)
+            per = (row[5] / row[4]) * 100
+            data[0] = str(data[0])
+            data[4] = str(data[4])
+            data[5] = str(data[5])
+            data.append(str(per))
+            print(data)
+            send_data = '/'.join(data)
+            send_clnt_msg(clnt_imfor[clnt_num][0], ('@graph ' + send_data))
+        send_clnt_msg(clnt_imfor[clnt_num][0], '@graph done')
+    con.close()
+    return
             
     
 
@@ -426,7 +422,7 @@ def call_func(clnt_num, instruction):
     elif instruction.startswith('set_q'):
         set_question(clnt_num, instruction)
     elif instruction == 'graph':
-        send_result(clnt_num)
+        send_result(clnt_num, instruction)
     else:
         return
 
