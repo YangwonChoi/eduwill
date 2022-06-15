@@ -288,26 +288,26 @@ class Student_Window(QMainWindow, form_stu):
         self.get_point_bt.setDisabled(False)
         if self.listWidget_5.currentRow() != -1:
             self.result[self.listWidget_5.currentRow()] = self.lineEdit_2.text()
-            self.listWidget_5.
 
         for i in self.result.values():
             if i == 0:
                 self.get_point_bt.setDisabled(True)
 
     def get_points(self):
+        self.sub_q= {}
         self.points = 0
         for i,v in enumerate(self.Qlist):
             if self.result[i] == v.split("/")[3]:
                 self.points += 1
-                self.result[i] = 1
+                self.sub_q[int(self.Qlist[i].split("/")[0])] = 1
             else: 
-                self.result[i] = 0
+                self.sub_q[int(self.Qlist[i].split("/")[0])] = 1
         
 
         QMessageBox.about(self, '채점', f'획득 점수: {self.points}')
         name = self.Qlist[0].split("/")[1]
         self.t1.send(f"{self.IDs}/{name}/{self.result}/{self.points}")
-        print(f"{self.IDs}/{name}/{self.result}/{self.points}")
+        print(f"{self.IDs}/{name}/{self.sub_q}/{self.points}")
         
         self.point += self.points
         self.result.clear()
@@ -381,8 +381,6 @@ class Student_Window(QMainWindow, form_stu):
                 self.result[self.row - 1] = 0
                 self.row += 1
            
-
-
         elif msg.startswith('@QnA'):
             msg = msg.replace('@QnA ', '', 1)
             for i in msg.split('@QnA '):
