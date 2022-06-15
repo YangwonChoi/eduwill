@@ -1,4 +1,5 @@
 import sys
+from this import s
 from PyQt5.QtWidgets import *
 from PyQt5 import uic
 from PyQt5 import QtCore
@@ -38,7 +39,7 @@ class SocketClient(QThread):  # Q쓰레드 클래스 선언
             data = self.cnn.recv(1024)
             data = data.decode()
             print(data)
-            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@set_q') or data.startswith('@invite'):
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@set_q') or data.startswith('@invite') or data.startswith('@QnA') or data.startswith('@list_q'):
                 self.add_user.emit(data)
 
     def send(self, msg):
@@ -54,6 +55,7 @@ class Student_Window(QMainWindow, form_stu):
     def __init__(self):
         super(Student_Window, self).__init__()
         self.initUI()
+        self.row = 1
         self.t1 = SocketClient()
         self.t1.connect_cle()
         self.t1.start()
@@ -86,6 +88,9 @@ class Student_Window(QMainWindow, form_stu):
         self.pushButton_2.clicked.connect(self.discovery)  #과목선택창 발견지대륙 버튼 눌렀을때
         self.pushButton_3.clicked.connect(self.character)  #과목선택창 특징 버튼 눌렀을때
         self.pushButton_6.clicked.connect(self.quiz_exit)  # 퀴즈 저장/종료 버튼 눌렀을때
+        self.listWidget_5.itemClicked.connect(self.quiz_clicked)
+        self.save_bt.clicked.connect(self.save_result)
+        self.get_point_bt.clicked.connect(self.get_points)
 
 
     def initUI(self):
@@ -108,6 +113,12 @@ class Student_Window(QMainWindow, form_stu):
         self.tableWidget.setColumnWidth(2, 150)
         self.tableWidget.setColumnWidth(3, 150)
         self.tableWidget.setColumnWidth(1, 146)
+        self.get_point_bt.setDisabled(True)
+        self.Qlist=[]
+        self.row = 1
+        self.result = {}
+        self.point = 0
+    
 
         palette = QPalette()
         palette.setBrush(QPalette.Background, QBrush(QPixmap("dino.png")))
@@ -170,6 +181,7 @@ class Student_Window(QMainWindow, form_stu):
 
     def login(self):  # 로그인 버튼 눌럿을때
         self.t1.send(f"@log_in/{self.login_id.text()}/{self.login_pw.text()}")
+        self.IDs = self.login_id.text()
 
     def chating(self):  # 상담버튼 눌렀을때
         self.menu_widget.hide()
@@ -243,23 +255,67 @@ class Student_Window(QMainWindow, form_stu):
 
     def survival_stage(self):  # 생존시기 과목 버튼 눌렀을때
         self.widget.hide()
+        self.listWidget_5.clear()
+
         self.t1.send("@list_q/생존시기")
+        self.get_point_bt.setDisabled(True)
         self.quiz_widget.show()       
 
     def discovery(self):  # 발견지대륙 과목 버튼 눌렀을때
         self.widget.hide()
+        self.listWidget_5.clear()
         self.t1.send("@list_q/발견지대륙")
+        self.get_point_bt.setDisabled(True)
         self.quiz_widget.show()
 
     def character(self):  # 특징 과목 버튼 눌렀을때
         self.widget.hide()
+        self.listWidget_5.clear()
         self.t1.send("@list_q/특징")
+        self.get_point_bt.setDisabled(True)
         self.quiz_widget.show()
 
     def quiz_exit(self):  # 퀴즈 저장/종료 버튼 눌렀을때
         self.quiz_widget.hide()
         self.widget.show()
 
+    def quiz_clicked(self):
+        self.label_42.setText(self.Qlist[self.listWidget_5.currentRow()].split('/')[2])
+        self.lineEdit_2.clear()
+     
+
+    def save_result(self):
+        self.get_point_bt.setDisabled(False)
+        if self.listWidget_5.currentRow() != -1:
+            self.result[self.listWidget_5.currentRow()] = self.lineEdit_2.text()
+            self.listWidget_5.
+
+        for i in self.result.values():
+            if i == 0:
+                self.get_point_bt.setDisabled(True)
+
+    def get_points(self):
+        self.points = 0
+        for i,v in enumerate(self.Qlist):
+            if self.result[i] == v.split("/")[3]:
+                self.points += 1
+                self.result[i] = 1
+            else: 
+                self.result[i] = 0
+        
+
+        QMessageBox.about(self, '채점', f'획득 점수: {self.points}')
+        name = self.Qlist[0].split("/")[1]
+        self.t1.send(f"{self.IDs}/{name}/{self.result}/{self.points}")
+        print(f"{self.IDs}/{name}/{self.result}/{self.points}")
+        
+        self.point += self.points
+        self.result.clear()
+        self.lineEdit_2.clear()
+        self.Qlist.clear()
+        self.quiz_widget.hide()
+        self.widget.show()
+        
 
     @pyqtSlot(str)
     def add_user(self, msg):
@@ -311,7 +367,21 @@ class Student_Window(QMainWindow, form_stu):
                     self.t1.send('@invite OK')
                     self.chat_widget.show()
                     self.menu_widget.hide()
-        elif msg.startswith('@')
+
+        elif msg.startswith('@list_q'):
+            msg = msg.replace('@list_q ','',1)
+           
+            for i in msg.split('@list_q '):
+                print(i)
+                if i == "done" or i == "empty":
+                    self.row = 1
+                    break
+                self.Qlist.append(i)
+                self.listWidget_5.addItem(f"문제 {self.row}")
+                self.result[self.row - 1] = 0
+                self.row += 1
+           
+
 
         elif msg.startswith('@QnA'):
             msg = msg.replace('@QnA ', '', 1)
