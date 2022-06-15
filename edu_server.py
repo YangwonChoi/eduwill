@@ -391,11 +391,14 @@ def send_result(clnt_num, sub):
         rows = list(rows)
         for row in rows:
             data = list(row)
-            per = (row[5] / row[4]) * 100
+            if data[5] == 0:
+                data.append('0')
+            else:
+                per = (row[5] / row[4]) * 100
+                data.append(str(per))
             data[0] = str(data[0])
             data[4] = str(data[4])
             data[5] = str(data[5])
-            data.append(str(per))
             print(data)
             send_data = '/'.join(data)
             send_clnt_msg(clnt_imfor[clnt_num][0], ('@graph ' + send_data))
