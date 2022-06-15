@@ -378,20 +378,31 @@ def send_list(clnt_num):
 
 def send_result(clnt_num):
     con, c = get_DBcursor()
-    c.execute('SELECT * FROM historyTBL')
+    c.execute('SELECT Name FROM studentTBL')
     rows = c.fetchall()
     if not rows:
         send_clnt_msg(clnt_imfor[clnt_num][0], '@graph empty')
     else:
-        for row in rows:
-            row = list(row)
-            row[4] = str(row[4])
-            data = '/'.join(row)
-            send_clnt_msg(clnt_imfor[clnt_num][0], ('@graph ' + data))
-        send_clnt_msg(clnt_imfor[clnt_num][0], '@graph done')
-    con.close()
-    return
-
+        rows = '/'.join(rows)
+        send_clnt_msg(clnt_imfor[clnt_num][0], ('@graph ' + rows))
+        while True:
+            msg = recv_clnt_msg(clnt_imfor[clnt_num][0])
+            if msg == '@exit':
+                con.close()
+                return
+            else:
+                c.execute('SELECT * FROM historyTBL WHERE ID = (SELECT ID FROM studentTBL WHERE Name = ?)', (msg,))
+                rows = c.fetchall()
+                if not rows:
+                    send_clnt_msg(clnt_imfor[clnt_num][0], '@graph empty')
+                else:
+                    for row in rows:
+                        row = list(row)
+                        row[4] = str(row[4])
+                        data = '/'.join(row)
+                        send_clnt_msg(clnt_imfor[clnt_num][0], ('@graph ' + data))
+                    send_clnt_msg(clnt_imfor[clnt_num][0], '@graph done')
+            
     
 
 #상황에 맞는 함수 호출해주는 함수
