@@ -5,6 +5,11 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QThread, pyqtSlot
 from socket import *
 from PyQt5.QtGui import *
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+
+
 
 form_main = uic.loadUiType("professor.ui")[0]
 
@@ -27,7 +32,7 @@ class SocketClient(QThread):  # 서버와 클라이언트 그리고 서버에서
             data = self.cnn.recv(1024)
             data = data.decode()
 
-            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@list_q') or data.startswith('@invite') or data.startswith("@QnA"):
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@list_q') or data.startswith('@invite') or data.startswith("@QnA") or data.startswith('@graph'):
                 self.add_user.emit(data) #구동클래스에 데이터 전달
                 print("커멘드메세지",data)
 
@@ -58,6 +63,16 @@ class Professor_Window(QMainWindow, form_main):
         self.t1.start()
         self.show()
         self.id_check = None
+
+        self.a = FigureCanvas(plt.figure(figsize=(14, 6)))
+        self.ax = self.a.figure.subplots()  # self.a 캔버스를 나타내라
+        self.ax.xaxis.set_visible(False)
+        self.graph_layout.addWidget(self.a)
+
+        self.dics = {}
+        self.list_x = []
+        self.list_y = []
+
 #-----------------시그널-----------------------------
         self.sign_up_btn.clicked.connect(self.sign_up) #회원가입 버튼을 누를시
         self.back_btn.clicked.connect(self.sign_up_exit) #뒤로가기 버튼을 누를시
@@ -85,6 +100,12 @@ class Professor_Window(QMainWindow, form_main):
         self.anser_back.clicked.connect(self.answer_back)
         self.anser_btn2.clicked.connect(self.qna_serv)
         self.tableWidget.cellClicked.connect(lambda :self.qn_anser_btn.setDisabled(False))
+        self.learn_btn.clicked.connect(self.graph)
+        self.pushButton.clicked.connect(self.graph_back)
+        self.surButton.clicked.connect(lambda: self.radio_check2(self.surButton.text()))
+        self.findButton.clicked.connect(lambda: self.radio_check2(self.findButton.text()))
+        self.chaButton.clicked.connect(lambda: self.radio_check2(self.chaButton.text()))
+
 
 
     def initUI(self):
@@ -284,6 +305,51 @@ background-image : url(ssdds.png);}
                 self.tableWidget.setItem(int(i.split('/')[0]) - 1, 1, QTableWidgetItem(i.split("/")[1]))
                 self.tableWidget.setItem(int(i.split('/')[0]) - 1, 2, QTableWidgetItem(i.split("/")[4]))
 
+        # elif msg.startswith('@graph'):
+        #     msg = msg.replace('@graph ', '', 1)
+        #
+        #     for i in msg.split('@graph '):
+        #         if i == "done" or i == "empty":
+        #             self.row = 1
+        #
+        #             self.dics[self.row] = float(i.split("/")[-1])
+        #             self.row += 1
+        #             print("222", self.dics)
+        #             # for i in self.dics:
+        #             #     print('되나')
+        #             #     self.graph(self.dics[i])
+        #             #     # self.list_x.append(i)
+        #             #     # self.list_y.append(self.dics[i])
+        #             #     # print(self.list_x)
+        #             #     # print(self.list_y)
+        #
+        #             break
+        elif msg.startswith('@graph'):
+            msg = msg.replace('@graph ', '', 1)
+
+            for i in msg.split('@graph '):
+                if i == "done" or i == "empty":
+                    self.row = 1
+                    self.graph1()
+                    break
+                self.dics[self.row] =float(i.split("/")[-1])
+                self.row += 1
+
+
+
+
+
+
+
+
+    # def bar(self, bar):
+    #     for i in self.dics:
+    #         print(i)
+    #         print(self.dics[i])
+    #         self.list_x.append(i)
+    #         self.list_y.append(self.dics[i])
+    #     self.ax.bar(self.list_x,self.list_y)
+
 
 
     def closeEvent(self, event):
@@ -388,6 +454,47 @@ background-image : url(ssdds.png);}
         self.qn_widget.show()
 
 
+    def graph(self):
+        self.menu_widget.hide()
+        self.statistics_widget.show()
+
+
+
+
+    def graph1(self):
+        # self.ax.xaxis.set_visible(False)
+        self.ax.xaxis.set_visible(True)
+        self.ax.cla()
+
+        self.list_x.clear()
+        self.list_y.clear()
+        for i in self.dics:
+            self.list_x.append("Q"+str(i))
+            self.list_y.append(self.dics[i])
+            print(self.list_x)
+            print(self.list_y)
+        self.bar = self.ax.bar(self.list_x, self.list_y, color='pink')
+        self.dics.clear()
+
+
+
+
+
+
+        self.a.draw()
+
+
+    def radio_check2(self, sub):
+        self.t1.send(f'@graph/{sub}')
+
+
+
+
+    def graph_back(self):
+        self.statistics_widget.hide()
+        self.menu_widget.show()
+
+
 
 
 if __name__ == "__main__":
@@ -395,4 +502,3 @@ if __name__ == "__main__":
     win = Professor_Window()
     win.setWindowTitle('교수')
     sys.exit(app.exec())
-

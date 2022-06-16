@@ -1720,20 +1720,7 @@ border-radius: 15px}
       <string>문제질문</string>
      </property>
     </widget>
-    <widget class="QTextEdit" name="textEdit">
-     <property name="geometry">
-      <rect>
-       <x>70</x>
-       <y>260</y>
-       <width>801</width>
-       <height>70</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: rgb(255, 255, 255);</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="pushButton_5">
+    <widget class="QPushButton" name="get_point_bt">
      <property name="geometry">
       <rect>
        <x>650</x>
@@ -1756,7 +1743,7 @@ border-radius: 15px}
       </rect>
      </property>
      <property name="text">
-      <string>저장/종료</string>
+      <string>종료</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_43">
@@ -1765,11 +1752,37 @@ border-radius: 15px}
        <x>20</x>
        <y>260</y>
        <width>41</width>
-       <height>17</height>
+       <height>21</height>
       </rect>
      </property>
      <property name="text">
       <string>정답 :</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_2">
+     <property name="geometry">
+      <rect>
+       <x>70</x>
+       <y>260</y>
+       <width>671</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(255, 255, 255);</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="save_bt">
+     <property name="geometry">
+      <rect>
+       <x>760</x>
+       <y>260</y>
+       <width>89</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>제출</string>
      </property>
     </widget>
    </widget>
@@ -2029,11 +2042,11 @@ border-radius: 15px}
    <zorder>learn_widget</zorder>
    <zorder>chat_widget</zorder>
    <zorder>select_widget</zorder>
-   <zorder>quiz_widget</zorder>
    <zorder>widget</zorder>
    <zorder>qn_widget</zorder>
    <zorder>widget_2</zorder>
    <zorder>menu_widget</zorder>
+   <zorder>quiz_widget</zorder>
   </widget>
  </widget>
  <resources/>

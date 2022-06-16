@@ -1903,18 +1903,71 @@ border-radius: 5px}
        <height>321</height>
       </rect>
      </property>
+     <widget class="QWidget" name="verticalLayoutWidget_3">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>991</width>
+        <height>321</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="graph_layout"/>
+     </widget>
+    </widget>
+    <widget class="QRadioButton" name="surButton">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>40</y>
+       <width>112</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>생존시기</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="findButton">
+     <property name="geometry">
+      <rect>
+       <x>420</x>
+       <y>40</y>
+       <width>112</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>발견지대륙</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="chaButton">
+     <property name="geometry">
+      <rect>
+       <x>590</x>
+       <y>40</y>
+       <width>112</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>특징</string>
+     </property>
     </widget>
    </widget>
    <zorder>select_widget</zorder>
    <zorder>chat_widget</zorder>
    <zorder>sign_widget</zorder>
    <zorder>login_widget</zorder>
-   <zorder>menu_widget</zorder>
-   <zorder>statistics_widget</zorder>
    <zorder>qn_widget</zorder>
-   <zorder>quiz_widget</zorder>
    <zorder>make_widget</zorder>
    <zorder>anser_widget</zorder>
+   <zorder>quiz_widget</zorder>
+   <zorder>menu_widget</zorder>
+   <zorder>statistics_widget</zorder>
   </widget>
  </widget>
  <resources/>
