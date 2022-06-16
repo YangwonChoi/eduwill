@@ -439,7 +439,38 @@ def send_result(clnt_num, sub):
         con.close()
         return
             
-    
+
+def send_mark(clnt_num):
+    con,c = get_DBcursor()
+    send_list = []
+    c.execute('SELECT Name, ID FROM studentTBL')
+    rows = c.fetchall()
+    rows = list(rows)
+    for row in rows:
+        row = list(row)
+        send_list.append(row[0])
+    rows = '/'.join(send_list)
+    send_clnt_msg(clnt_imfor[clnt_num][0], ('@mark ' + rows))
+    while True:
+        msg = recv_clnt_msg(clnt_imfor[clnt_num][0])
+        if msg == 'exit':
+            con.close()
+            return
+        c.execute('SELECT * FROM historyTBL WHERE ID=(SELECT ID FROM studentTBL WHERE Name=?)', (msg,))
+        rows = c.fetchall()
+        if not rows:
+            send_clnt_msg(clnt_imfor[clnt_num][0], '@mark empty')
+        else:
+            for row in rows:
+                row = list(row)
+                row[3] = str(row[3])
+                send_data = '/'.join(row)
+                print(send_data)
+                send_clnt_msg(clnt_imfor[clnt_num][0], ('@result ' + send_data))
+            send_clnt_msg(clnt_imfor[clnt_num][0], '@result done')
+
+
+
 
 #상황에 맞는 함수 호출해주는 함수
 def call_func(clnt_num, instruction):
@@ -459,6 +490,8 @@ def call_func(clnt_num, instruction):
         set_question(clnt_num, instruction)
     elif instruction.startswith('graph'):
         send_result(clnt_num, instruction)
+    elif instruction == 'mark':
+        send_mark(clnt_num)
     else:
         return
 

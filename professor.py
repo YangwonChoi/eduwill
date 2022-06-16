@@ -5,9 +5,9 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QThread, pyqtSlot
 from socket import *
 from PyQt5.QtGui import *
-import numpy as np
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 
 
@@ -32,7 +32,9 @@ class SocketClient(QThread):  # 서버와 클라이언트 그리고 서버에서
             data = self.cnn.recv(1024)
             data = data.decode()
 
-            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@list_q') or data.startswith('@invite') or data.startswith("@QnA") or data.startswith('@graph'):
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat')\
+                    or data.startswith('@list_q') or data.startswith('@invite') or data.startswith("@QnA") \
+                    or data.startswith('@graph') or data.startswith('@mark') or data.startswith('@result'):
                 self.add_user.emit(data) #구동클래스에 데이터 전달
                 print("커멘드메세지",data)
 
@@ -59,10 +61,21 @@ class Professor_Window(QMainWindow, form_main):
         self.sign_widget.hide()
         self.qn_widget.hide()
         self.anser_widget.hide()
+        self.widget.hide()
         self.row = 1
         self.t1.start()
         self.show()
         self.id_check = None
+
+        self.a = FigureCanvas(plt.figure(figsize=(14, 6)))
+        self.ax = self.a.figure.subplots()  # self.a 캔버스를 나타내라
+        self.ax.xaxis.set_visible(False)
+        self.graph_layout.addWidget(self.a)
+
+        self.dics = {}
+        self.list_x = []
+        self.list_y = []
+
 #-----------------시그널-----------------------------
         self.sign_up_btn.clicked.connect(self.sign_up) #회원가입 버튼을 누를시
         self.back_btn.clicked.connect(self.sign_up_exit) #뒤로가기 버튼을 누를시
@@ -95,6 +108,10 @@ class Professor_Window(QMainWindow, form_main):
         self.surButton.clicked.connect(lambda: self.radio_check2(self.surButton.text()))
         self.findButton.clicked.connect(lambda: self.radio_check2(self.findButton.text()))
         self.chaButton.clicked.connect(lambda: self.radio_check2(self.chaButton.text()))
+        self.mark.clicked.connect(self.marks)
+        self.pushButton_2.clicked.connect(self.marks2)
+        self.listWidget_3.itemClicked.connect(lambda: self.t1.send(f"{self.listWidget_3.currentItem().text()}"))
+
 
 
     def initUI(self):
@@ -297,10 +314,43 @@ background-image : url(ssdds.png);}
         elif msg.startswith('@graph'):
             msg = msg.replace('@graph ', '', 1)
 
-            for i in msg:
+            for i in msg.split('@graph '):
+                if i == "done" or i == "empty":
+                    self.row = 1
+                    self.graph1()
+                    break
+                self.dics[self.row] =float(i.split("/")[-1])
+                self.row += 1
+
+        elif msg.startswith('@mark'):
+            msg = msg.replace('@mark ', '', 1)
+            for i in msg.split("/"):
                 if i == "done" or i == "empty":
                     break
-                print(msg)
+                self.listWidget_3.addItem(i)
+
+        elif msg.startswith('@result'):
+            msg = msg.replace('@result ', '', 1)
+            try:
+                self.lineEdit_3.setText(msg.split("/")[0])
+                self.lineEdit_4.setText(msg.split("/")[1])
+                self.lineEdit_5.setText(msg.split("/")[2])
+            except:
+                pass
+
+
+
+
+    def marks(self):
+        self.widget.show()
+        self.t1.send("@mark")
+        self.statistics_widget.hide()
+
+    def marks2(self):
+        self.widget.hide()
+        self.statistics_widget.show()
+
+
 
 
     def closeEvent(self, event):
@@ -408,23 +458,32 @@ background-image : url(ssdds.png);}
     def graph(self):
         self.menu_widget.hide()
         self.statistics_widget.show()
-        self.btn = [self.surButton, self.findButton, self.chaButton]
-        for i in self.btn:
-            if i.isChecked():
-                self.table = i.text()
-                print(self.table)
-        self.t1.send(f'@graph/{self.table}')
 
 
-        # self.fig = plt.figure()
-        # self.canvas = FigureCanvasQTAgg(self.fig)
-        # self.grp_widget.addWidget(self.canvas)
-        # dic = {"student1": 85, "student2": 90, "student3": 70, "student4": 80}
-        #
-        # plt.bar(dic.keys(), dic.values(), color="pink", width=0.4)
-        # plt.xlabel("name")
-        # plt.ylabel("score")
-        # plt.show()
+
+
+    def graph1(self):
+        # self.ax.xaxis.set_visible(False)
+        self.ax.xaxis.set_visible(True)
+        self.ax.cla()
+
+        self.list_x.clear()
+        self.list_y.clear()
+        for i in self.dics:
+            self.list_x.append("Q"+str(i))
+            self.list_y.append(self.dics[i])
+            print(self.list_x)
+            print(self.list_y)
+        self.bar = self.ax.bar(self.list_x, self.list_y, color='pink')
+        self.dics.clear()
+
+
+
+
+
+
+        self.a.draw()
+
 
     def radio_check2(self, sub):
         self.t1.send(f'@graph/{sub}')
@@ -439,10 +498,8 @@ background-image : url(ssdds.png);}
 
 
 
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Professor_Window()
     win.setWindowTitle('교수')
     sys.exit(app.exec())
-
