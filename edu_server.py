@@ -128,6 +128,11 @@ def log_in(clnt_num, log_in_data):
     else:  # 해당 id에 대한 pw 일치 시 @sucess send 및 clnt_imfor 갱신
         if (check_pw,) == pw:
             send_clnt_msg(clnt_sock, '@log_in sucess')
+            if type == 'stu':
+                c.execute('SELECT Point FROM studentTBL WHERE ID=?', (check_id,))
+                point = c.fetchone()
+                point = ''.join(map(str, point))
+                send_clnt_msg(clnt_sock, ('@log_in ' + point))
             clnt_imfor[clnt_num][1] = check_id
             clnt_imfor[clnt_num][3] = 1
             print('login %s, %s' % (type, check_id))
@@ -243,6 +248,13 @@ def send_questions(clnt_num, question):  # 문제출제 함수
             print(hst_data)
             c.executemany("INSERT INTO historyTBL(ID, Subject, Data, Score) VALUES(?, ?, ?, ?)", (hst_data,))
             con.commit()
+            c.execute('SELECT Point FROM studentTBL WHERE ID=?',(hst_data[0],))
+            score = c.fetchone()
+            score = list(score)
+            print(score)
+            score[0] += hst_data[3]
+            c.execute('UPDATE studentTBL SET Point=? WHERE ID=?', (score[0], hst_data[0]))
+            con.commit()
             quiz_data = eval(hst_data[2])
             for k in quiz_data:
                 c.execute('SELECT Solving_count, Correct_count FROM quizTBL WHERE No=?', (k,))
@@ -253,7 +265,6 @@ def send_questions(clnt_num, question):  # 문제출제 함수
                     row[1] += 1
                 c.execute('UPDATE quizTBL SET Solving_count=?, Correct_count=? WHERE No=?',(row[0], row[1], k))
                 con.commit()
-                
     con.close()
     return
 
@@ -369,7 +380,7 @@ def set_chat_state(clnt_num, name):
 
 
 #접속자명단 보내는 함수
-def send_list(clnt_num):
+def send_user_list(clnt_num):
     con, c = get_DBcursor()
     name_list = []
     if clnt_imfor[clnt_num][2] == 'tea': #리스트 요청한 게 선생님일 경우
@@ -443,7 +454,7 @@ def call_func(clnt_num, instruction):
     elif instruction.startswith('chat'):
         set_chat_state(clnt_num, instruction)
     elif instruction == 'member':
-        send_list(clnt_num)
+        send_user_list(clnt_num)
     elif instruction.startswith('set_q'):
         set_question(clnt_num, instruction)
     elif instruction.startswith('graph'):
@@ -463,7 +474,7 @@ def handle_clnt(clnt_sock):
 
     while True:
         clnt_msg = recv_clnt_msg(clnt_sock)
-        if clnt_msg == '@exit':                        # 클라이언트 연결 끊길 시
+        if clnt_msg == '@exit' or not clnt_msg:                        # 클라이언트 연결 끊길 시
             lock.acquire()
             delete_imfor(clnt_sock)
             clnt_sock.close()
