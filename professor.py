@@ -110,7 +110,7 @@ class Professor_Window(QMainWindow, form_main):
         self.chaButton.clicked.connect(lambda: self.radio_check2(self.chaButton.text()))
         self.mark.clicked.connect(self.marks)
         self.pushButton_2.clicked.connect(self.marks2)
-        self.listWidget_3.itemClicked.connect(lambda: self.t1.send(f"{self.listWidget_3.currentItem().text()}"))
+        self.listWidget_3.itemClicked.connect(self.marks3)
 
 
 
@@ -354,6 +354,12 @@ background-image : url(ssdds.png);}
         self.widget.hide()
         self.t1.send("exit")
         self.statistics_widget.show()
+
+    def marks3(self):
+        self.lineEdit_3.clear()
+        self.lineEdit_4.clear()
+        self.lineEdit_5.clear()
+        self.t1.send(f"{self.listWidget_3.currentItem().text()}")
 
 
 
