@@ -59,6 +59,7 @@ class Professor_Window(QMainWindow, form_main):
         self.sign_widget.hide()
         self.qn_widget.hide()
         self.anser_widget.hide()
+        self.widget.hide()
         self.row = 1
         self.t1.start()
         self.show()
@@ -105,6 +106,8 @@ class Professor_Window(QMainWindow, form_main):
         self.surButton.clicked.connect(lambda: self.radio_check2(self.surButton.text()))
         self.findButton.clicked.connect(lambda: self.radio_check2(self.findButton.text()))
         self.chaButton.clicked.connect(lambda: self.radio_check2(self.chaButton.text()))
+        self.mark.clicked.connect(self.marks)
+        self.pushButton_2.clicked.connect(self.marks2)
 
 
 
@@ -336,19 +339,15 @@ background-image : url(ssdds.png);}
                 self.row += 1
 
 
+    def marks(self):
+        self.widget.show()
+        self.t1.send("@mark")
+        self.statistics_widget.hide()
 
+    def marks2(self):
+        self.widget.hide()
+        self.statistics_widget.show()
 
-
-
-
-
-    # def bar(self, bar):
-    #     for i in self.dics:
-    #         print(i)
-    #         print(self.dics[i])
-    #         self.list_x.append(i)
-    #         self.list_y.append(self.dics[i])
-    #     self.ax.bar(self.list_x,self.list_y)
 
 
 
