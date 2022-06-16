@@ -246,8 +246,13 @@ def send_questions(clnt_num, question):  # 문제출제 함수
             hst_data = msg.split('/')
             hst_data[3] = int(hst_data[3])
             print(hst_data)
-            c.executemany("INSERT INTO historyTBL(ID, Subject, Data, Score) VALUES(?, ?, ?, ?)", (hst_data,))
-            con.commit()
+            c.execute('SELECT * FROM historyTBL WHERE ID=? and Subject=?', (hst_data[0], hst_data[1]))
+            check = c.fetchone()
+            if not check:
+                c.executemany("INSERT INTO historyTBL(ID, Subject, Data, Score) VALUES(?, ?, ?, ?)", (hst_data,))
+                con.commit()
+            else:
+                c.execute('UPDATE historyTBL SET ID=?, Subject=?, Data=?, Score=? WHERE ID=? and Subject=?', (hst_data[0], hst_data[1], hst_data[2], hst_data[3], hst_data[0], hst_data[1]))
             c.execute('SELECT Point FROM studentTBL WHERE ID=?',(hst_data[0],))
             score = c.fetchone()
             score = list(score)

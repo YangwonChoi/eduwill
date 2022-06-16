@@ -110,7 +110,7 @@ class Professor_Window(QMainWindow, form_main):
         self.chaButton.clicked.connect(lambda: self.radio_check2(self.chaButton.text()))
         self.mark.clicked.connect(self.marks)
         self.pushButton_2.clicked.connect(self.marks2)
-        self.listWidget_3.itemClicked.connect(lambda: self.t1.send(f"{self.listWidget_3.currentItem().text()}"))
+        self.listWidget_3.itemClicked.connect(self.marks3)
 
 
 
@@ -324,31 +324,42 @@ background-image : url(ssdds.png);}
 
         elif msg.startswith('@mark'):
             msg = msg.replace('@mark ', '', 1)
+
             for i in msg.split("/"):
                 if i == "done" or i == "empty":
                     break
+
                 self.listWidget_3.addItem(i)
 
         elif msg.startswith('@result'):
             msg = msg.replace('@result ', '', 1)
-            try:
-                self.lineEdit_3.setText(msg.split("/")[0])
-                self.lineEdit_4.setText(msg.split("/")[1])
-                self.lineEdit_5.setText(msg.split("/")[2])
-            except:
-                pass
-
-
+            for i in msg.split('@result '):
+                if i == "done" or i == "empty":
+                    break
+                if i.split("/")[1] == "생존시기":
+                    self.lineEdit_3.setText(i.split("/")[-1])
+                elif i.split("/")[1] == "발견지대륙":
+                    self.lineEdit_4.setText(i.split("/")[-1])
+                elif i.split("/")[1] == "특징":
+                    self.lineEdit_5.setText(i.split("/")[-1])
 
 
     def marks(self):
         self.widget.show()
+        self.listWidget_3.clear()
         self.t1.send("@mark")
         self.statistics_widget.hide()
 
     def marks2(self):
         self.widget.hide()
+        self.t1.send("exit")
         self.statistics_widget.show()
+
+    def marks3(self):
+        self.lineEdit_3.clear()
+        self.lineEdit_4.clear()
+        self.lineEdit_5.clear()
+        self.t1.send(f"{self.listWidget_3.currentItem().text()}")
 
 
 
@@ -419,8 +430,6 @@ background-image : url(ssdds.png);}
         self.t1.send("@QnA")
 
 
-
-
     def qna_back(self):
         self.qn_widget.hide()
         self.menu_widget.show()
@@ -457,9 +466,8 @@ background-image : url(ssdds.png);}
 
     def graph(self):
         self.menu_widget.hide()
+        self.t1.send("@graph/생존시기")
         self.statistics_widget.show()
-
-
 
 
     def graph1(self):
@@ -472,31 +480,18 @@ background-image : url(ssdds.png);}
         for i in self.dics:
             self.list_x.append("Q"+str(i))
             self.list_y.append(self.dics[i])
-            print(self.list_x)
-            print(self.list_y)
         self.bar = self.ax.bar(self.list_x, self.list_y, color='pink')
         self.dics.clear()
 
-
-
-
-
-
         self.a.draw()
-
 
     def radio_check2(self, sub):
         self.t1.send(f'@graph/{sub}')
 
 
-
-
     def graph_back(self):
         self.statistics_widget.hide()
         self.menu_widget.show()
-
-
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
