@@ -1998,11 +1998,6 @@ border-radius: 5px}
         <property name="styleSheet">
          <string notr="true">background-color: rgb(255, 255, 255);</string>
         </property>
-        <item>
-         <property name="text">
-          <string>dsad</string>
-         </property>
-        </item>
        </widget>
       </item>
      </layout>
