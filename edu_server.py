@@ -132,7 +132,7 @@ def log_in(clnt_num, log_in_data):
                 c.execute('SELECT Point FROM studentTBL WHERE ID=?', (check_id,))
                 point = c.fetchone()
                 point = ''.join(map(str, point))
-                send_clnt_msg(clnt_sock, ('@log_in ' + point))
+                send_clnt_msg(clnt_sock, ('@point ' + point))
             clnt_imfor[clnt_num][1] = check_id
             clnt_imfor[clnt_num][3] = 1
             print('login %s, %s' % (type, check_id))
