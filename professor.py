@@ -324,28 +324,41 @@ background-image : url(ssdds.png);}
 
         elif msg.startswith('@mark'):
             msg = msg.replace('@mark ', '', 1)
+
             for i in msg.split("/"):
+                if i == "done" or i == "empty":
+                    break
+
                 self.listWidget_3.addItem(i)
 
         elif msg.startswith('@result'):
             msg = msg.replace('@result ', '', 1)
-            try:
-                self.lineEdit_3.setText(msg.split("/")[0])
-                self.lineEdit_4.setText(msg.split("/")[1])
-                self.lineEdit_5.setText(msg.split("/")[2])
-            except:
-                pass
+            for i in msg.split('@result '):
+                if i == "done" or i == "empty":
+                    break
+                if i.split("/")[1] == "생존시기":
+                    self.lineEdit_3.setText(i.split("/")[-1])
+                elif i.split("/")[1] == "발견지대륙":
+                    self.lineEdit_4.setText(i.split("/")[-1])
+                elif i.split("/")[1] == "특징":
+                    self.lineEdit_5.setText(i.split("/")[-1])
+
+
+
+
 
 
 
 
     def marks(self):
         self.widget.show()
+        self.listWidget_3.clear()
         self.t1.send("@mark")
         self.statistics_widget.hide()
 
     def marks2(self):
         self.widget.hide()
+        self.t1.send("exit")
         self.statistics_widget.show()
 
 
@@ -455,6 +468,7 @@ background-image : url(ssdds.png);}
 
     def graph(self):
         self.menu_widget.hide()
+        self.t1.send("@graph/생존시기")
         self.statistics_widget.show()
 
 
@@ -470,8 +484,6 @@ background-image : url(ssdds.png);}
         for i in self.dics:
             self.list_x.append("Q"+str(i))
             self.list_y.append(self.dics[i])
-            print(self.list_x)
-            print(self.list_y)
         self.bar = self.ax.bar(self.list_x, self.list_y, color='pink')
         self.dics.clear()
 
