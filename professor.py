@@ -344,12 +344,6 @@ background-image : url(ssdds.png);}
                     self.lineEdit_5.setText(i.split("/")[-1])
 
 
-
-
-
-
-
-
     def marks(self):
         self.widget.show()
         self.listWidget_3.clear()
@@ -430,8 +424,6 @@ background-image : url(ssdds.png);}
         self.t1.send("@QnA")
 
 
-
-
     def qna_back(self):
         self.qn_widget.hide()
         self.menu_widget.show()
@@ -472,8 +464,6 @@ background-image : url(ssdds.png);}
         self.statistics_widget.show()
 
 
-
-
     def graph1(self):
         # self.ax.xaxis.set_visible(False)
         self.ax.xaxis.set_visible(True)
@@ -487,26 +477,15 @@ background-image : url(ssdds.png);}
         self.bar = self.ax.bar(self.list_x, self.list_y, color='pink')
         self.dics.clear()
 
-
-
-
-
-
         self.a.draw()
-
 
     def radio_check2(self, sub):
         self.t1.send(f'@graph/{sub}')
 
 
-
-
     def graph_back(self):
         self.statistics_widget.hide()
         self.menu_widget.show()
-
-
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
