@@ -32,7 +32,9 @@ class SocketClient(QThread):  # 서버와 클라이언트 그리고 서버에서
             data = self.cnn.recv(1024)
             data = data.decode()
 
-            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat') or data.startswith('@list_q') or data.startswith('@invite') or data.startswith("@QnA") or data.startswith('@graph'):
+            if data.startswith('@sign_up') or data.startswith('@log_in') or data.startswith('@member') or data.startswith('@chat')\
+                    or data.startswith('@list_q') or data.startswith('@invite') or data.startswith("@QnA") \
+                    or data.startswith('@graph') or data.startswith('@mark') or data.startswith('@result'):
                 self.add_user.emit(data) #구동클래스에 데이터 전달
                 print("커멘드메세지",data)
 
@@ -108,6 +110,7 @@ class Professor_Window(QMainWindow, form_main):
         self.chaButton.clicked.connect(lambda: self.radio_check2(self.chaButton.text()))
         self.mark.clicked.connect(self.marks)
         self.pushButton_2.clicked.connect(self.marks2)
+        self.listWidget_3.itemClicked.connect(lambda: self.t1.send(f"{self.listWidget_3.currentItem().text()}"))
 
 
 
@@ -308,25 +311,6 @@ background-image : url(ssdds.png);}
                 self.tableWidget.setItem(int(i.split('/')[0]) - 1, 1, QTableWidgetItem(i.split("/")[1]))
                 self.tableWidget.setItem(int(i.split('/')[0]) - 1, 2, QTableWidgetItem(i.split("/")[4]))
 
-        # elif msg.startswith('@graph'):
-        #     msg = msg.replace('@graph ', '', 1)
-        #
-        #     for i in msg.split('@graph '):
-        #         if i == "done" or i == "empty":
-        #             self.row = 1
-        #
-        #             self.dics[self.row] = float(i.split("/")[-1])
-        #             self.row += 1
-        #             print("222", self.dics)
-        #             # for i in self.dics:
-        #             #     print('되나')
-        #             #     self.graph(self.dics[i])
-        #             #     # self.list_x.append(i)
-        #             #     # self.list_y.append(self.dics[i])
-        #             #     # print(self.list_x)
-        #             #     # print(self.list_y)
-        #
-        #             break
         elif msg.startswith('@graph'):
             msg = msg.replace('@graph ', '', 1)
 
@@ -337,6 +321,22 @@ background-image : url(ssdds.png);}
                     break
                 self.dics[self.row] =float(i.split("/")[-1])
                 self.row += 1
+
+        elif msg.startswith('@mark'):
+            msg = msg.replace('@mark ', '', 1)
+            for i in msg.split("/"):
+                self.listWidget_3.addItem(i)
+
+        elif msg.startswith('@result'):
+            msg = msg.replace('@result ', '', 1)
+            try:
+                self.lineEdit_3.setText(msg.split("/")[0])
+                self.lineEdit_4.setText(msg.split("/")[1])
+                self.lineEdit_5.setText(msg.split("/")[2])
+            except:
+                pass
+
+
 
 
     def marks(self):
