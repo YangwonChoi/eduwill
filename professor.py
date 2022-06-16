@@ -5,9 +5,9 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QThread, pyqtSlot
 from socket import *
 from PyQt5.QtGui import *
-import numpy as np
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 
 
@@ -63,6 +63,16 @@ class Professor_Window(QMainWindow, form_main):
         self.t1.start()
         self.show()
         self.id_check = None
+
+        self.a = FigureCanvas(plt.figure(figsize=(14, 6)))
+        self.ax = self.a.figure.subplots()  # self.a 캔버스를 나타내라
+        self.ax.xaxis.set_visible(False)
+        self.graph_layout.addWidget(self.a)
+
+        self.dics = {}
+        self.list_x = []
+        self.list_y = []
+
 #-----------------시그널-----------------------------
         self.sign_up_btn.clicked.connect(self.sign_up) #회원가입 버튼을 누를시
         self.back_btn.clicked.connect(self.sign_up_exit) #뒤로가기 버튼을 누를시
@@ -95,6 +105,7 @@ class Professor_Window(QMainWindow, form_main):
         self.surButton.clicked.connect(lambda: self.radio_check2(self.surButton.text()))
         self.findButton.clicked.connect(lambda: self.radio_check2(self.findButton.text()))
         self.chaButton.clicked.connect(lambda: self.radio_check2(self.chaButton.text()))
+
 
 
     def initUI(self):
@@ -294,13 +305,51 @@ background-image : url(ssdds.png);}
                 self.tableWidget.setItem(int(i.split('/')[0]) - 1, 1, QTableWidgetItem(i.split("/")[1]))
                 self.tableWidget.setItem(int(i.split('/')[0]) - 1, 2, QTableWidgetItem(i.split("/")[4]))
 
+        # elif msg.startswith('@graph'):
+        #     msg = msg.replace('@graph ', '', 1)
+        #
+        #     for i in msg.split('@graph '):
+        #         if i == "done" or i == "empty":
+        #             self.row = 1
+        #
+        #             self.dics[self.row] = float(i.split("/")[-1])
+        #             self.row += 1
+        #             print("222", self.dics)
+        #             # for i in self.dics:
+        #             #     print('되나')
+        #             #     self.graph(self.dics[i])
+        #             #     # self.list_x.append(i)
+        #             #     # self.list_y.append(self.dics[i])
+        #             #     # print(self.list_x)
+        #             #     # print(self.list_y)
+        #
+        #             break
         elif msg.startswith('@graph'):
             msg = msg.replace('@graph ', '', 1)
 
-            for i in msg:
+            for i in msg.split('@graph '):
                 if i == "done" or i == "empty":
+                    self.row = 1
+                    self.graph1()
                     break
-                print(msg)
+                self.dics[self.row] =float(i.split("/")[-1])
+                self.row += 1
+                print("3333")
+            print("4444")
+
+
+
+
+
+
+    # def bar(self, bar):
+    #     for i in self.dics:
+    #         print(i)
+    #         print(self.dics[i])
+    #         self.list_x.append(i)
+    #         self.list_y.append(self.dics[i])
+    #     self.ax.bar(self.list_x,self.list_y)
+
 
 
     def closeEvent(self, event):
@@ -408,12 +457,31 @@ background-image : url(ssdds.png);}
     def graph(self):
         self.menu_widget.hide()
         self.statistics_widget.show()
-        self.btn = [self.surButton, self.findButton, self.chaButton]
-        for i in self.btn:
-            if i.isChecked():
-                self.table = i.text()
-                print(self.table)
-        self.t1.send(f'@graph/{self.table}')
+
+
+
+
+    def graph1(self):
+        # self.ax.xaxis.set_visible(False)
+        self.ax.xaxis.set_visible(True)
+        self.ax.cla()
+        self.list_x.clear()
+        self.list_y.clear()
+        for i in self.dics:
+            self.list_x.append("Q"+str(i))
+            self.list_y.append(self.dics[i])
+            print(self.list_x)
+            print(self.list_y)
+        self.bar = self.ax.bar(self.list_x, self.list_y, color='pink')
+
+
+
+
+        # self.bar = self.ax.text(1, a, a, horizontalalignment='center', verticalalignment='bottom')
+
+        self.a.draw()
+        # self.list_x.append(i)
+        # self.list_y.append(self.dics[i])
 
 
         # self.fig = plt.figure()
@@ -428,6 +496,20 @@ background-image : url(ssdds.png);}
 
     def radio_check2(self, sub):
         self.t1.send(f'@graph/{sub}')
+        # for i in self.dics:
+        #     # self.list_x.append(i)
+        #     # self.list_y.append(self.dics[i])
+        #     # self.bar = self.ax.bar(self.list_x, self.list_y, color='pink')
+        #     # self.bar = self.ax.text(1, self.list_x, self.list_y, horizontalalignment='center', verticalalignment='bottom')
+        #     # self.a.draw()
+        #     self.list_x.append(i)
+        #     self.list_y.append(self.dics[i])
+        #     self.bar = self.ax.bar(1, self.list_y, color='pink')
+        #     self.bar = self.ax.text(1, self.list_y, self.list_y, horizontalalignment='center',
+        #                             verticalalignment='bottom')
+        #     self.a.draw()
+
+
 
 
 
@@ -439,10 +521,8 @@ background-image : url(ssdds.png);}
 
 
 
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Professor_Window()
     win.setWindowTitle('교수')
     sys.exit(app.exec())
-
